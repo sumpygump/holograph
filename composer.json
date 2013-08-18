@@ -1,0 +1,23 @@
+{
+    "name": "sumpygump/holograph",
+    "type": "utility",
+    "description": "Style guide build tool",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jansen Price",
+            "email": "jansen.price@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "sumpygump/qi-console": "dev-master",
+        "symfony/yaml": "2.3.3",
+        "dflydev/markdown": "1.*"
+    },
+    "autoload": {
+        "psr-0" : {
+            "Holograph\\" : "lib/"
+        }
+    }
+}

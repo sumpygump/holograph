@@ -1,0 +1,10 @@
+#!/usr/bin/env php
+<?php
+
+include dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'vendor/autoload.php';
+
+$arguments = new Qi_Console_ArgV($argv, Holograph\Client::$argRules);
+$terminal = new Qi_Console_Terminal();
+
+$holographClient = new Holograph\Client($arguments, $terminal);
+exit($holographClient->execute());
