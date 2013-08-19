@@ -73,6 +73,11 @@ class Client extends \Qi_Console_Client
      */
     public function execute()
     {
+        if ($this->_args->help || $this->_args->h || $this->_args->action == 'help') {
+            $this->displayHelp();
+            return 0;
+        }
+
         $config = $this->readConfigFile('.holograph.yaml');
         $builder = new Builder($config, $this);
 
@@ -83,6 +88,27 @@ class Client extends \Qi_Console_Client
         }
 
         return $this->_status;
+    }
+
+    /**
+     * Display help message
+     *
+     * @return void
+     */
+    public function displayHelp()
+    {
+        print Version::renderVersion();
+
+        print "A markdown based documentation system for OOCSS\n\n";
+        print "Usage: holograph <action> [OPTIONS]\n";
+        print "\nActions:\n";
+        print "  build : Build the style guide HTML/CSS\n";
+        print "  help : Display program help and exit\n";
+        print "\nOptions:\n";
+        print "  -q | --quiet : Quiet mode (Don't output anything)\n";
+        print "  -h | --help : Display program help and exit\n";
+        print "  --version : Display program version and exit\n";
+        print "  -f <file> | --file <file> : Use alternate configuration file\n";
     }
 
     /**
