@@ -87,6 +87,16 @@ class Builder
     }
 
     /**
+     * Get configuration
+     *
+     * @return array
+     */
+    public function getConfig()
+    {
+        return $this->_config;
+    }
+
+    /**
      * Execute
      *
      * @return void

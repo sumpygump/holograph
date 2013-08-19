@@ -121,6 +121,12 @@ class Client extends \Qi_Console_Client
             $configFileOverride = true;
         }
 
+        if ($this->_args->action == 'init') {
+            $this->notify("Initializing environment for Holograph");
+            $this->writeConfig();
+            return 0;
+        }
+
         $config = $this->readConfigFile($this->_configFilename, $configFileOverride);
         $builder = new Builder($config, $this);
 
@@ -131,6 +137,23 @@ class Client extends \Qi_Console_Client
         }
 
         return $this->_status;
+    }
+
+    /**
+     * Write a config file to disk
+     *
+     * @return void
+     */
+    public function writeConfig()
+    {
+        if (file_exists($this->_configFilename)) {
+            $this->_halt(sprintf("Config file already exists: '%s'", $this->_configFilename));
+        }
+
+        $defaultBuilder = new Builder(array(), $this);
+
+        $this->notify(sprintf("Writing default configuration to config file '%s'", $this->_configFilename));
+        file_put_contents($this->_configFilename, Yaml::dump($defaultBuilder->getConfig()));
     }
 
     /**
@@ -145,6 +168,7 @@ class Client extends \Qi_Console_Client
         print "A markdown based documentation system for OOCSS\n\n";
         print "Usage: holograph <action> [OPTIONS]\n";
         print "\nActions:\n";
+        print "  init : Initialize environment for holograph (write conf file with defaults)\n";
         print "  build : Build the style guide HTML/CSS\n";
         print "  help : Display program help and exit\n";
         print "\nOptions:\n";
