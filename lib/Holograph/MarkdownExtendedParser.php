@@ -12,6 +12,9 @@ use dflydev\markdown\MarkdownExtraParser;
 /**
  * MarkdownExtendedParser
  *
+ * This Markdown parser includes features not provided by default with the 
+ * base markdown format. The key feature supported here is fenced code blocks.
+ *
  * Based on changes in https://github.com/egil/php-markdown-extra-extended
  *
  * @uses MarkdownExtraParser

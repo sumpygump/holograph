@@ -12,6 +12,10 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Builder
  *
+ * The builder class contains the logic to read the source files, generate a 
+ * mapping of output files and writing the output files to the destiantion 
+ * directory.
+ *
  * @package Holograph
  * @author Jansen Price <jansen.price@gmail.com>
  * @version $Id$
@@ -66,7 +70,7 @@ class Builder
         }
 
         $this->notify(
-            "Using congifuration:\n" . Yaml::dump($this->_config),
+            "Using configuration:\n" . Yaml::dump($this->_config),
             Client::NOTIFY_VERBOSE
         );
     }

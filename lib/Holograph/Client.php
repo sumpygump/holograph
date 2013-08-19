@@ -12,6 +12,9 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Client
  *
+ * The client facilitates interactions from the user via a command line 
+ * interface to execute functions for the holograph system.
+ *
  * @uses Qi_Console_Client
  * @package Holograph
  * @author Jansen Price <jansen.price@gmail.com>

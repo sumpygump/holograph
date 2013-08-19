@@ -10,6 +10,8 @@ namespace Holograph;
 /**
  * Version
  *
+ * This class will track the current version of Holograph
+ *
  * @package Holograph
  * @author Jansen Price <jansen.price@gmail.com>
  * @version $Id$
@@ -19,7 +21,7 @@ class Version
     /**
      * Current version
      */
-    const VERSION = '0.2';
+    const VERSION = '0.3';
 
     /**
      * Render version

@@ -1,9 +1,37 @@
 <?php
+/**
+ * Markdown renderer for Holograph
+ *
+ * @package Holograph
+ */
 
 namespace Holograph;
 
 /**
  * MarkdownRenderer
+ *
+ * This is a specific Markdown parser for Holograph, which converts fenced code 
+ * blocks containing the word 'example' into markup that showcases the snippet 
+ * itself as well as the code block.
+ *
+ * Example:
+ *
+ * The following markdown:
+ * ```html_example
+ * <h1>Hello World</h1>
+ * ```
+ *
+ * Will render the following HTML:
+ * <div class="codeExample">
+ *     <div class="exampleOutput">
+ *         <h1>Hello World</h1>
+ *     </div>
+ *     <div class="codeBlock>
+ *         <pre class="language-html_example">
+ *             &lt;h1&gt;Hello World&lt;/h1&gt;
+ *         </pre>
+ *     </div>
+ * </div>
  *
  * @uses MarkdownExtendedParser
  * @package Holograph
