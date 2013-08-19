@@ -30,7 +30,12 @@ class Client extends \Qi_Console_Client
         'quiet|q'    => 'Quiet mode',
         'conf|c:'    => 'Config file',
         'version'    => 'Display version',
+        'verbose|v'  => 'Verbose output',
     );
+
+    const NOTIFY_WARNING = 0;
+    const NOTIFY_MESSAGE = 1;
+    const NOTIFY_VERBOSE = 2;
 
     /**
      * Exit status code
@@ -45,6 +50,20 @@ class Client extends \Qi_Console_Client
      * @var mixed
      */
     protected $_quiet = false;
+
+    /**
+     * Verbosity level
+     *
+     * @var int
+     */
+    protected static $_verbose = false;
+
+    /**
+     * Default configuration filename
+     *
+     * @var string
+     */
+    protected $_configFilename = 'holograph.yml';
 
     /**
      * init
@@ -74,6 +93,10 @@ class Client extends \Qi_Console_Client
      */
     public function execute()
     {
+        if ($this->_args->verbose) {
+            self::$_verbose = true;
+        }
+
         if ($this->_args->help || $this->_args->h || $this->_args->action == 'help') {
             $this->displayHelp();
             return 0;
@@ -84,12 +107,23 @@ class Client extends \Qi_Console_Client
             return 0;
         }
 
-        $config = $this->readConfigFile('.holograph.yaml');
+        $this->notify("Current path: " . getcwd(), self::NOTIFY_VERBOSE);
+
+        $configFileOverride = false;
+        if ($this->_args->conf) {
+            $this->_configFilename = $this->_args->conf;
+            // If a specified file fails, we want to bail since there are 
+            // destructive commands run (rm -rf) on paths that the user may not 
+            // have intended with a custom config file
+            $configFileOverride = true;
+        }
+
+        $config = $this->readConfigFile($this->_configFilename, $configFileOverride);
         $builder = new Builder($config, $this);
 
         try {
             $builder->execute();
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $this->_halt($exception->getMessage());
         }
 
@@ -111,20 +145,41 @@ class Client extends \Qi_Console_Client
         print "  build : Build the style guide HTML/CSS\n";
         print "  help : Display program help and exit\n";
         print "\nOptions:\n";
-        print "  -q | --quiet : Quiet mode (Don't output anything)\n";
+        print "  -c <file> | --conf <file> : Use alternate configuration file\n";
         print "  -h | --help : Display program help and exit\n";
+        print "  -q | --quiet : Quiet mode (Don't output anything)\n";
+        print "  -v | --verbose : Verbose output mode\n";
         print "  --version : Display program version and exit\n";
-        print "  -f <file> | --file <file> : Use alternate configuration file\n";
     }
 
     /**
      * Read config file
      * 
-     * @param string $configFile
-     * @return void
+     * @param string $configFile Path to configuration file to load
+     * @param bool $throwException Whether to throw an exception if file is missing
+     * @return array
      */
-    public function readConfigFile($configFile)
+    public function readConfigFile($configFile, $throwException = false)
     {
+        if (!file_exists($configFile)) {
+            if ($throwException) {
+                throw new \Exception(
+                    sprintf("Config file '%s' not found. (Path: %s)", $configFile, getcwd())
+                );
+            }
+
+            $this->notify(
+                sprintf(
+                    "Config file '%s' not found. Using default configuration. (Path: %s)",
+                    $configFile, getcwd()
+                ),
+                self::NOTIFY_WARNING
+            );
+            return array();
+        }
+
+        $this->notify(sprintf("Using config file '%s'", $configFile), self::NOTIFY_VERBOSE);
+
         $config = Yaml::parse($configFile);
 
         if ($config == $configFile) {
@@ -145,7 +200,7 @@ class Client extends \Qi_Console_Client
      *      3 = action
      * @return void
      */
-    public function notify($message, $level = 1)
+    public function notify($message, $level = self::NOTIFY_MESSAGE)
     {
         switch ($level) {
         case 0:

@@ -7,4 +7,9 @@ $arguments = new Qi_Console_ArgV($argv, Holograph\Client::$argRules);
 $terminal = new Qi_Console_Terminal();
 
 $holographClient = new Holograph\Client($arguments, $terminal);
-exit($holographClient->execute());
+try {
+    exit($holographClient->execute());
+} catch (Exception $exception) {
+    $terminal->pretty_message($exception->getMessage(), 7, 1);
+    exit(2);
+}

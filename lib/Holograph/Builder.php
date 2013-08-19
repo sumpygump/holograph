@@ -64,6 +64,11 @@ class Builder
         foreach ($config as $param => $value) {
             $this->_config[$param] = $value;
         }
+
+        $this->notify(
+            "Using congifuration:\n" . Yaml::dump($this->_config),
+            Client::NOTIFY_VERBOSE
+        );
     }
 
     /**
@@ -110,6 +115,11 @@ class Builder
 
         sort($files);
 
+        $this->notify(
+            sprintf("Found %s files in source dir", count($files)),
+            Client::NOTIFY_VERBOSE
+        );
+
         return $files;
     }
 
@@ -124,6 +134,7 @@ class Builder
         foreach ($files as $file) {
             $extension = pathinfo($file, PATHINFO_EXTENSION);
             if ($extension == 'md') {
+                $this->notify(sprintf("Reading file '%s'", $file), Client::NOTIFY_VERBOSE);
                 $filename = pathinfo($file, PATHINFO_FILENAME) . ".html";
                 $this->_pages[$filename] = file_get_contents($file);
             } else {
@@ -140,7 +151,7 @@ class Builder
      */
     public function parseSourceFile($file)
     {
-        $this->notify("Reading file $file");
+        $this->notify("Reading file '$file'", Client::NOTIFY_VERBOSE);
         $contents = file_get_contents($file);
 
         // Find all the desired commment blocks (/*doc ... */)
@@ -206,7 +217,8 @@ class Builder
 
             if (isset($this->_docBlocks[$documentBlock->name])) {
                 $this->notify(
-                    sprintf("Warning: Overwriting block with name '%s'", $documentBlock->name)
+                    sprintf("Warning: Overwriting block with name '%s'", $documentBlock->name),
+                    Client::NOTIFY_WARNING
                 );
             }
 
@@ -267,7 +279,8 @@ class Builder
             mkdir($destination);
         }
 
-        //include_once 'MarkdownExtendedParser.php';
+        $this->notify(sprintf("Writing to dest dir '%s'...", $destination));
+
         $markdownParser = new MarkdownRenderer();
         $documentationAssets = $this->_config['documentationAssets'];
 
@@ -276,14 +289,17 @@ class Builder
 
         foreach ($this->_pages as $filename => $content) {
             $filename = $destination . DIRECTORY_SEPARATOR . $filename;
-            $this->notify(sprintf("Writing file '%s'", $filename));
+            $this->notify(
+                sprintf("Writing file '%s'", $filename),
+                Client::NOTIFY_VERBOSE
+            );
             $htmlContent = $markdownParser->transform($content);
 
             file_put_contents($filename, $header . $htmlContent . $footer);
         }
 
         // Copy templates/* and dependencies to destination dir
-        $this->notify('Copying assets');
+        $this->notify(sprintf("Copying assets to dest dir '%s'...", $destination));
 
         $assetDirs = glob(
             $this->_config['documentationAssets'] . DIRECTORY_SEPARATOR . '*',
@@ -300,7 +316,7 @@ class Builder
                     "rm -rf %s",
                     escapeshellarg($destination . DIRECTORY_SEPARATOR . $basename)
                 );
-                echo $cmd . "\n";
+                $this->notify($cmd, Client::NOTIFY_VERBOSE);
                 passthru($cmd);
 
                 $cmd = sprintf(
@@ -308,7 +324,7 @@ class Builder
                     escapeshellarg($path),
                     escapeshellarg($destination . DIRECTORY_SEPARATOR . $basename)
                 );
-                echo $cmd . "\n";
+                $this->notify($cmd, Client::NOTIFY_VERBOSE);
                 passthru($cmd);
             }
         }
@@ -321,7 +337,7 @@ class Builder
      * @param int $level
      * @return void
      */
-    public function notify($message, $level = 1)
+    public function notify($message, $level = Client::NOTIFY_MESSAGE)
     {
         if ($this->_client) {
             $this->_client->notify($message, $level);
