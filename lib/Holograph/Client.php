@@ -29,6 +29,7 @@ class Client extends \Qi_Console_Client
         'help|h'     => 'Help',
         'quiet|q'    => 'Quiet mode',
         'conf|c:'    => 'Config file',
+        'version'    => 'Display version',
     );
 
     /**
@@ -75,6 +76,11 @@ class Client extends \Qi_Console_Client
     {
         if ($this->_args->help || $this->_args->h || $this->_args->action == 'help') {
             $this->displayHelp();
+            return 0;
+        }
+
+        if ($this->_args->version || $this->_args->action == 'version') {
+            print Version::renderVersion();
             return 0;
         }
 
