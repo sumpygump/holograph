@@ -141,6 +141,9 @@ class Client extends \Qi_Console_Client
             $this->notify("Initializing environment for Holograph");
             $this->writeConfig();
             break;
+        case 'config':
+            $this->showConfig();
+            break;
         case 'build':
             $config = $this->readConfigFile($this->_configFilename, $configFileOverride);
             $builder = new Builder($config, $this);
@@ -179,6 +182,17 @@ class Client extends \Qi_Console_Client
     }
 
     /**
+     * Show current configuration
+     *
+     * @return void
+     */
+    public function showConfig()
+    {
+        $config = $this->readConfigFile($this->_configFilename);
+        $this->notify("Current config:\n---------------\n" . Yaml::dump($config));
+    }
+
+    /**
      * Display help message
      *
      * @return void
@@ -191,6 +205,7 @@ class Client extends \Qi_Console_Client
         print "Usage: holograph <action> [OPTIONS]\n";
         print "\nActions:\n";
         print "  init : Initialize environment for holograph (write conf file with defaults)\n";
+        print "  config : Show current configuration parameters\n";
         print "  build : Build the style guide HTML/CSS\n";
         print "  help : Display program help and exit\n";
         print "\nOptions:\n";
