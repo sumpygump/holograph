@@ -36,16 +36,29 @@ class Client extends \Qi_Console_Client
         'verbose|v'  => 'Verbose output',
     );
 
+    /**
+     * Notify constants
+     *
+     * @var int
+     */
     const NOTIFY_WARNING = 0;
     const NOTIFY_MESSAGE = 1;
     const NOTIFY_VERBOSE = 2;
+
+    /**
+     * Exit status constants
+     *
+     * @var int
+     */
+    const STATUS_SUCCESS = 0;
+    const STATUS_ERROR   = 1;
 
     /**
      * Exit status code
      * 
      * @var float
      */
-    protected $_status = 0;
+    protected $_status = self::STATUS_SUCCESS;
 
     /**
      * Be quiet
@@ -104,12 +117,12 @@ class Client extends \Qi_Console_Client
 
         if ($this->_args->help || $this->_args->h || $action == 'help') {
             $this->displayHelp();
-            return 0;
+            return self::STATUS_SUCCESS;
         }
 
         if ($this->_args->version || $action == 'version') {
             print Version::renderVersion();
-            return 0;
+            return self::STATUS_SUCCESS;
         }
 
         $this->notify("Current path: " . getcwd(), self::NOTIFY_VERBOSE);
@@ -123,19 +136,26 @@ class Client extends \Qi_Console_Client
             $configFileOverride = true;
         }
 
-        if ($action == 'init') {
+        switch ($action) {
+        case 'init':
             $this->notify("Initializing environment for Holograph");
             $this->writeConfig();
-            return 0;
-        }
+            break;
+        case 'build':
+            $config = $this->readConfigFile($this->_configFilename, $configFileOverride);
+            $builder = new Builder($config, $this);
 
-        $config = $this->readConfigFile($this->_configFilename, $configFileOverride);
-        $builder = new Builder($config, $this);
+            try {
+                $builder->execute();
+            } catch (\Exception $exception) {
+                $this->_halt($exception->getMessage());
+            }
 
-        try {
-            $builder->execute();
-        } catch (\Exception $exception) {
-            $this->_halt($exception->getMessage());
+            break;
+        default:
+            $this->notify("Unrecognized action '$action'", self::NOTIFY_WARNING);
+            $this->_status = self::STATUS_ERROR;
+            break;
         }
 
         return $this->_status;
@@ -232,16 +252,16 @@ class Client extends \Qi_Console_Client
     public function notify($message, $level = self::NOTIFY_MESSAGE)
     {
         switch ($level) {
-        case 0:
+        case self::NOTIFY_WARNING:
             $this->_displayWarning($message);
             $this->_status = 2;
             break;
-        case 1:
+        case self::NOTIFY_MESSAGE:
             if (!$this->_quiet) {
                 $this->_displayMessage($message);
             }
             break;
-        case 2:
+        case self::NOTIFY_VERBOSE:
             if (self::$_verbose && !$this->_quiet) {
                 $this->_displayMessage(">> " . $message, true, 3);
             }
