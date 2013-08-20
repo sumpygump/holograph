@@ -1,7 +1,11 @@
 #!/usr/bin/env php
 <?php
 
-include dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'vendor/autoload.php';
+$autoloadPath = dirname(__DIR__) . DIRECTORY_SEPARATOR;
+if (!file_exists($autoloadPath . 'vendor/autoload.php')) {
+    $autoloadPath = dirname(dirname(dirname($autoloadPath)));
+}
+include $autoloadPath . DIRECTORY_SEPARATOR . 'vendor/autoload.php';
 
 $arguments = new Qi_Console_ArgV($argv, Holograph\Client::$argRules);
 $terminal = new Qi_Console_Terminal();
