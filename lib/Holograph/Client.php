@@ -100,12 +100,14 @@ class Client extends \Qi_Console_Client
             self::$_verbose = true;
         }
 
-        if ($this->_args->help || $this->_args->h || $this->_args->action == 'help') {
+        $action = $this->_args->action ? $this->_args->action : "help";
+
+        if ($this->_args->help || $this->_args->h || $action == 'help') {
             $this->displayHelp();
             return 0;
         }
 
-        if ($this->_args->version || $this->_args->action == 'version') {
+        if ($this->_args->version || $action == 'version') {
             print Version::renderVersion();
             return 0;
         }
@@ -121,7 +123,7 @@ class Client extends \Qi_Console_Client
             $configFileOverride = true;
         }
 
-        if ($this->_args->action == 'init') {
+        if ($action == 'init') {
             $this->notify("Initializing environment for Holograph");
             $this->writeConfig();
             return 0;
