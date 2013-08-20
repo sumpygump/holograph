@@ -146,6 +146,10 @@ class Client extends \Qi_Console_Client
             break;
         case 'build':
             $config = $this->readConfigFile($this->_configFilename, $configFileOverride);
+
+            if ($this->_args->compat) {
+                $config['compatMode'] = $this->_args->compat;
+            }
             $builder = new Builder($config, $this);
 
             try {
@@ -221,6 +225,7 @@ class Client extends \Qi_Console_Client
         print "  -q | --quiet : Quiet mode (Don't output anything)\n";
         print "  -v | --verbose : Verbose output mode\n";
         print "  --version : Display program version and exit\n";
+        print "  --compat : Use hologram compatible mode (header.html/footer.html)\n";
     }
 
     /**

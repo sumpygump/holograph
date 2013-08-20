@@ -1,0 +1,367 @@
+/* ---------------------------------------------------------------------
+RESET CSS (thanks Eric Meyer)
+------------------------------------------------------------------------ */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font-weight: inherit;
+    font-style: inherit;
+    font-family: inherit;
+    vertical-align: baseline;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    line-height: 1;
+}
+
+strong {
+    font-weight: bold;
+}
+
+ol, ul {
+    list-style: none;
+}
+
+blockquote, q {
+    quotes: none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+:focus {
+    outline: 0;
+}
+
+/* Always show a vertical scrollbar, even when there is no scrolling */
+html {
+    overflow-y: scroll;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+/* ---------------------------------------------------------------------
+ HTML5 Block / Inline Block declarations
+------------------------------------------------------------------------ */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+
+audio, canvas, video {
+    display: inline-block;
+}
+
+/* ---------------------------------------------------------------------
+ Page
+------------------------------------------------------------------------ */
+.hg-page {
+
+}
+
+.hg-page-hd {
+    background-color: #2a3744;
+}
+
+.hg-page-nav {
+    background-color: #69573d;
+}
+
+.hg-page-bd-c {
+    padding: 20px;
+}
+
+.hg-wrapper {
+    width: 1020px;
+    margin: 0 auto;
+}
+
+/* ---------------------------------------------------------------------
+ Masthead
+------------------------------------------------------------------------ */
+.hg-masthead {
+    background-color: #2c435b;
+    color: #ffffff;
+    padding: 20px;
+}
+
+/* ---------------------------------------------------------------------
+ Navigation
+------------------------------------------------------------------------ */
+.hg-navigation {
+    background-color: #8c6d3e;
+}
+
+.hg-navigation a:link,
+.hg-navigation a:visited,
+.hg-navigation a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.hg-navigation ul {
+    overflow: hidden;
+    margin: 0;
+}
+
+.hg-navigation li {
+    float: left;
+    margin: 0;
+}
+
+.hg-navigation li a {
+    display: block;
+    padding: 8px 20px;
+}
+
+.hg-navigation li a:hover {
+    background-color: #c5ad89;
+}
+
+/* ---------------------------------------------------------------------
+ Sub navigation
+------------------------------------------------------------------------ */
+
+.hg-box {
+    border: 1px solid #e9e9e9;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    -ms-border-radius: 6px;
+    -o-border-radius: 6px;
+    border-radius: 6px;
+}
+
+.hg-subnav {
+}
+
+.hg-subnav > li {
+    border-top: 1px solid #e9e9e9;
+}
+
+.hg-subnav > li:first-child {
+    border-top: 1px solid transparent;
+}
+
+.hg-subnav a {
+    display: block;
+    padding: 10px;
+    color: #2c435b;
+    text-decoration: none;
+}
+
+.hg-subnav a:hover {
+    background-color: #f9f9f9;
+    color: #c5a473;
+}
+
+/* ---------------------------------------------------------------------
+ Headings
+------------------------------------------------------------------------ */
+.hg-hdg {
+    font-weight: bold;
+}
+
+.hg-hdg_1 {
+    font-size: 30px;
+}
+
+/* ---------------------------------------------------------------------
+ Grid
+ Generated with cssgrid v0.7 at 2013-08-20 01:45:43
+ cssgrid --units=percent --cols=12 --col-width=64 --gutter=10 --max-width=878
+------------------------------------------------------------------------ */
+.hg-grid:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.hg-grid-col {
+    position: relative;
+    float: left;
+}
+
+.hg-grid-col + .hg-grid-col {
+    margin-left: 1.1389521640091%;
+}
+
+.hg-grid-col_1of12 { width: 7.2892938496583%; }
+.hg-grid-col_2of12 { width: 15.717539863326%; }
+.hg-grid-col_3of12 { width: 24.145785876993%; }
+.hg-grid-col_4of12 { width: 32.574031890661%; }
+.hg-grid-col_5of12 { width: 41.002277904328%; }
+.hg-grid-col_6of12 { width: 49.430523917995%; }
+.hg-grid-col_7of12 { width: 57.858769931663%; }
+.hg-grid-col_8of12 { width: 66.28701594533%; }
+.hg-grid-col_9of12 { width: 74.715261958998%; }
+.hg-grid-col_10of12 { width: 83.143507972665%; }
+.hg-grid-col_11of12 { width: 91.571753986333%; }
+.hg-grid-col_12of12 { width: 100%; }
+
+
+/* ---------------------------------------------------------------------
+ Content
+------------------------------------------------------------------------ */
+
+.hg-content * {
+    font-family: sans-serif;
+    line-height: 1.5em;
+}
+
+.hg-content h1 {
+    font-size: 30px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.hg-content > h1:first-of-type {
+    margin-top: 0;
+}
+
+.hg-content h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.hg-content p {
+    margin-bottom: 20px;
+}
+
+.hg-page-ft {
+    margin-top: 20px;
+    text-align: center;
+    background-color: #f9f9f9;
+    padding: 10px 0;
+}
+
+blockquote:before {
+    content: "Design Note:";
+    font-weight: bold;
+}
+
+blockquote {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    font-family: "Comic Sans MS";
+    font-size:16px;
+    margin: 10px 0;
+    padding: 5px;
+}
+
+code {
+    padding: 2px 4px;
+    color: #d14;
+    white-space: nowrap;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+div.codeExample, div.jsExample {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+div.jsExample {
+    border-top: 0px;
+}
+
+div.codeExample:before, div.jsExample:before {
+    font-family: "OpenSans", sans-serif;
+    color: #222;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    position: relative;
+    padding: 2px;
+    display: block;
+}
+
+div.codeExample:before {
+    content: "Example";
+    background-color: #f9f9f9;
+    width: 60px;
+    top: -1px;
+    left: -1px;
+}
+
+div.jsExample:before {
+    content: "JS Example";
+    background-color: #fff;
+    width: 80px;
+    top: -11px;
+    left: -11px;
+}
+
+div.codeBlock, div.exampleOutput {
+    padding: 10px;
+}
+
+div.codeBlock {
+    background-color: #f9f9f9;
+    border-top: 1px solid #ccc;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.docSwatch {
+    min-height: 218.21px;
+    border: 1px solid #ccc;
+    padding: 10px 0 0 10px;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.codeExample .line > div:after {
+    content: attr(class);
+    display: block;
+    min-height: 40px;
+    line-height: 40px;
+    background-color: #EEE;
+    text-align: center;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+table, table tr, table td, table th {
+    padding: 7px;
+    border: 1px solid #ccc;
+}
+
+table th {
+    font-weight: bold;
+}

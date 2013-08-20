@@ -35,10 +35,12 @@ class Builder
      * @var array
      */
     protected $_config = array(
+        'title'               => "Style Guide",
         'source'              => "./components",
         'destination'         => "./docs",
         'documentationAssets' => "./templates",
         'dependencies'        => array("./build"),
+        'compatMode'          => false,
     );
 
     /**
@@ -54,6 +56,13 @@ class Builder
      * @var array
      */
     protected $_pages = array();
+
+    /**
+     * Storage of navigation items
+     *
+     * @var array
+     */
+    protected $_navigationItems = array();
 
     /**
      * Constructor
@@ -264,8 +273,11 @@ class Builder
     {
         foreach ($docBlocks as $documentBlock) {
             if ($documentBlock->outputFile) {
+                $pageName = $documentBlock->outputFile;
                 $outputFile = strtolower(trim($documentBlock->outputFile . ".html"));
                 $outputFile = str_replace(' ', '_', $outputFile);
+
+                $this->_navigationItems[$outputFile] = $pageName;
             }
 
             if (!isset($this->_pages[$outputFile])) {
@@ -298,8 +310,13 @@ class Builder
         $markdownParser = new MarkdownRenderer();
         $documentationAssets = $this->_config['documentationAssets'];
 
-        $header = file_get_contents($documentationAssets . DIRECTORY_SEPARATOR . 'header.html');
-        $footer = file_get_contents($documentationAssets . DIRECTORY_SEPARATOR . 'footer.html');
+        // Compat mode uses header and footer files. Compatible with hologram.
+        if ($this->_config['compatMode']) {
+            $header = $this->getHeader();
+            $footer = $this->getFooter();
+        } else {
+            $layout = $this->getLayout();
+        }
 
         foreach ($this->_pages as $filename => $content) {
             $filename = $destination . DIRECTORY_SEPARATOR . $filename;
@@ -309,7 +326,11 @@ class Builder
             );
             $htmlContent = $markdownParser->transform($content);
 
-            file_put_contents($filename, $header . $htmlContent . $footer);
+            if ($this->_config['compatMode']) {
+                file_put_contents($filename, $header . $htmlContent . $footer);
+            } else {
+                file_put_contents($filename, str_replace("{{content}}", $htmlContent, $layout));
+            }
         }
 
         // Copy templates/* and dependencies to destination dir
@@ -342,6 +363,68 @@ class Builder
                 passthru($cmd);
             }
         }
+    }
+
+    /**
+     * Get layout
+     *
+     * @return string
+     */
+    public function getLayout()
+    {
+        $layoutFilename = $this->_config['documentationAssets'] . DIRECTORY_SEPARATOR . 'layout.html';
+        if (!file_exists($layoutFilename)) {
+            $layoutFilename = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR
+                . 'default_templates' . DIRECTORY_SEPARATOR . 'layout.html';
+        }
+
+        $layout = file_get_contents($layoutFilename);
+
+        $layout = str_replace("{{title}}", $this->_config['title'], $layout);
+
+        $navigation = "";
+        foreach ($this->_navigationItems as $filename => $pageName) {
+            $navigation .= sprintf('<li><a href="%s">%s</a></li>', $filename, $pageName) . "\n";
+        }
+        $layout = str_replace("{{navigation}}", $navigation, $layout);
+
+        return $layout;
+    }
+
+    /**
+     * Get header
+     *
+     * Only for hologram compatible mode
+     *
+     * @return string
+     */
+    public function getHeader()
+    {
+        $headerFilename = $this->_config['documentationAssets'] . DIRECTORY_SEPARATOR . 'header.html';
+        if (!file_exists($headerFilename)) {
+            $this->notify(sprintf("Header file '%s' not found.", $headerFilename), Client::NOTIFY_WARNING);
+            return '<html><head></head><body>';
+        }
+
+        return file_get_contents($headerFilename);
+    }
+
+    /**
+     * Get footer
+     *
+     * Only for hologram compatible mode
+     *
+     * @return string
+     */
+    public function getFooter()
+    {
+        $footerFilename = $this->_config['documentationAssets'] . DIRECTORY_SEPARATOR . 'footer.html';
+        if (!file_exists($footerFilename)) {
+            $this->notify(sprintf("Footer file '%s' not found.", $footerFilename), Client::NOTIFY_WARNING);
+            return '</body></html>';
+        }
+
+        return file_get_contents($footerFilename);
     }
 
     /**
