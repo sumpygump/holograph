@@ -375,7 +375,7 @@ class Builder
         $layoutFilename = $this->_config['documentationAssets'] . DIRECTORY_SEPARATOR . 'layout.html';
         if (!file_exists($layoutFilename)) {
             $layoutFilename = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR
-                . 'default_templates' . DIRECTORY_SEPARATOR . 'layout.html';
+                . 'default-templates' . DIRECTORY_SEPARATOR . 'layout.html';
         }
 
         $layout = file_get_contents($layoutFilename);

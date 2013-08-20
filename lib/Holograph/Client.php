@@ -192,7 +192,7 @@ class Client extends \Qi_Console_Client
      */
     public function showConfig()
     {
-        $config = $this->readConfigFile($this->_configFilename, true);
+        $config = $this->readConfigFile($this->_configFilename);
 
         $this->notify(
             sprintf(
