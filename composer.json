@@ -19,5 +19,6 @@
         "psr-0" : {
             "Holograph\\" : "lib/"
         }
-    }
+    },
+    "bin": ["bin/holograph"]
 }
