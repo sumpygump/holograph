@@ -272,11 +272,11 @@ class Builder
                 $this->_pages[$outputFile] = '';
             }
 
+            $this->_pages[$outputFile] .= "\n" . $documentBlock->markdown;
+
             if ($documentBlock->children) {
                 $this->buildPages($documentBlock->children, $outputFile);
             }
-
-            $this->_pages[$outputFile] .= "\n" . $documentBlock->markdown;
         }
     }
 
