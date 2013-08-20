@@ -188,8 +188,15 @@ class Client extends \Qi_Console_Client
      */
     public function showConfig()
     {
-        $config = $this->readConfigFile($this->_configFilename);
-        $this->notify("Current config:\n---------------\n" . Yaml::dump($config));
+        $config = $this->readConfigFile($this->_configFilename, true);
+
+        $this->notify(
+            sprintf(
+                "Current config: (%s)\n---------------\n%s",
+                $this->_configFilename,
+                Yaml::dump($config)
+            )
+        );
     }
 
     /**
