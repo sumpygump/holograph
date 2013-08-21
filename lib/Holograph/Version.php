@@ -21,7 +21,7 @@ class Version
     /**
      * Current version
      */
-    const VERSION = '0.5';
+    const VERSION = '0.6';
 
     /**
      * Render version
