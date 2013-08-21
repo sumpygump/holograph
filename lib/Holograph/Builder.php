@@ -209,14 +209,14 @@ class Builder
      */
     public function compressSourceFiles($files)
     {
+        if (!file_exists($this->_config['build'])) {
+            passthru("mkdir -p " . escapeshellarg($this->_config['build']));
+        }
+
         foreach ($files as $file) {
             $extension = pathinfo($file, PATHINFO_EXTENSION);
             if ($extension == 'md') {
                 continue;
-            }
-
-            if (!file_exists($this->_config['build'])) {
-                passthru("mkdir -p " . escapeshellarg($this->_config['build']));
             }
 
             // Move from source dir into build dir
@@ -225,6 +225,11 @@ class Builder
                 $this->_config['build'],
                 $file
             );
+
+            $path = dirname($newfile);
+            if (!file_exists($path)) {
+                passthru("mkdir -p " . escapeshellarg($path));
+            }
 
             $cmd = sprintf(
                 "cp %s %s",
