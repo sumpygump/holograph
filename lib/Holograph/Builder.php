@@ -39,6 +39,8 @@ class Builder
         'source'               => "./components",
         'destination'          => "./docs",
         'documentation_assets' => "./templates",
+        'build'                => "./build/css",
+        'stylesheet_include'   => "build/css/screen.css",
         'dependencies'         => array("./build"),
         'compat_mode'          => false,
     );
@@ -114,6 +116,8 @@ class Builder
     {
         $files = $this->getSourceFilelist();
         $this->parseSourceFiles($files);
+
+        $this->compressSourceFiles($files);
 
         $this->buildPages($this->_docBlocks);
 
@@ -195,6 +199,44 @@ class Builder
     }
 
     /**
+     * Compress the source files as part of the build step
+     *
+     * @todo: This is a simple implementation and should be replaced with a 
+     * tool like mince, minify, csscrush, csstidy or something that can minify 
+     * and combine files.
+     * @param array $files Array of source files
+     * @return void
+     */
+    public function compressSourceFiles($files)
+    {
+        foreach ($files as $file) {
+            $extension = pathinfo($file, PATHINFO_EXTENSION);
+            if ($extension == 'md') {
+                continue;
+            }
+
+            if (!file_exists($this->_config['build'])) {
+                passthru("mkdir -p " . escapeshellarg($this->_config['build']));
+            }
+
+            // Move from source dir into build dir
+            $newfile = str_replace(
+                $this->_config['source'],
+                $this->_config['build'],
+                $file
+            );
+
+            $cmd = sprintf(
+                "cp %s %s",
+                escapeshellarg($file),
+                escapeshellarg($newfile)
+            );
+            $this->notify($cmd, Client::NOTIFY_VERBOSE);
+            passthru($cmd);
+        }
+    }
+
+    /**
      * Create a document block from a comment block
      *
      * If there is no metadata portion, ignore this block.
@@ -202,6 +244,8 @@ class Builder
      * The meta data is yaml data at the top of the comment, formatted thusly:
      * ---
      * name: nameOfBlock
+     * title: My Title
+     * category: The Category
      * ---
      *
      * @param string $commentBlock Comment block from file
@@ -354,9 +398,11 @@ class Builder
 
         $assets = array_merge($this->_config['dependencies'], $assetDirs);
 
-	// When there are no custom template files to use, let's include
-	// holograph's default template dir.
-        if (count($assets) == 1 && !file_exists($assets[0])) {
+        // When there are no custom template files to use, let's include
+        // holograph's default template dir.
+        if (count($assets) == 1
+            && (!file_exists($assets[0]) || $assets[0] != $this->_config['documentation_assets'])
+        ) {
             $assets[] = $layoutFilename = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR
                 . 'default-templates' . DIRECTORY_SEPARATOR . 'static';
         }
@@ -399,6 +445,7 @@ class Builder
         $layout = file_get_contents($layoutFilename);
 
         $layout = str_replace("{{title}}", $this->_config['title'], $layout);
+        $layout = str_replace("{{stylesheet_include}}", $this->_config['stylesheet_include'], $layout);
 
         $navigation = "";
         foreach ($this->_navigationItems as $filename => $pageName) {
