@@ -1,4 +1,12 @@
 /* ---------------------------------------------------------------------
+Holograph Example documentation stylesheet.
+
+This stylesheet provides a default example of your styleguide doc styles.
+You can use this styleguide stylesheet or create your own to match your
+site's styleguide branding or colors.
+------------------------------------------------------------------------ */
+
+/* ---------------------------------------------------------------------
 RESET CSS (thanks Eric Meyer)
 ------------------------------------------------------------------------ */
 html, body, div, span, applet, object, iframe,
@@ -82,6 +90,14 @@ audio, canvas, video {
 }
 
 /* ---------------------------------------------------------------------
+ Base
+------------------------------------------------------------------------ */
+body {
+    font-family: sans-serif;
+    font-size: 14px;
+}
+
+/* ---------------------------------------------------------------------
  Page
 ------------------------------------------------------------------------ */
 .hg-page {
@@ -98,6 +114,13 @@ audio, canvas, video {
 
 .hg-page-bd-c {
     padding: 20px;
+}
+
+.hg-page-ft {
+    margin-top: 20px;
+    text-align: center;
+    background-color: #f9f9f9;
+    padding: 10px 0;
 }
 
 .hg-wrapper {
@@ -259,19 +282,16 @@ audio, canvas, video {
     margin-bottom: 20px;
 }
 
-.hg-page-ft {
-    margin-top: 20px;
-    text-align: center;
-    background-color: #f9f9f9;
-    padding: 10px 0;
+.hg-content pre {
+    font-family: monospace;
 }
 
-blockquote:before {
+.hg-content blockquote:before {
     content: "Design Note:";
     font-weight: bold;
 }
 
-blockquote {
+.hg-content blockquote {
     border: 1px solid #eee;
     border-radius: 4px;
     font-family: "Comic Sans MS";
@@ -280,7 +300,7 @@ blockquote {
     padding: 5px;
 }
 
-code {
+.hg-content code {
     padding: 2px 4px;
     color: #d14;
     white-space: nowrap;
@@ -289,17 +309,19 @@ code {
     border-radius: 4px;
 }
 
-div.codeExample, div.jsExample {
+.hg-content .codeExample,
+.hg-content .jsExample {
     border: 1px solid #ccc;
     border-radius: 4px;
     margin: 10px 0;
 }
 
-div.jsExample {
+.hg-content .jsExample {
     border-top: 0px;
 }
 
-div.codeExample:before, div.jsExample:before {
+.hg-content .codeExample:before,
+.hg-content .jsExample:before {
     font-family: "OpenSans", sans-serif;
     color: #222;
     border: 1px solid #ccc;
@@ -311,7 +333,7 @@ div.codeExample:before, div.jsExample:before {
     display: block;
 }
 
-div.codeExample:before {
+.hg-content .codeExample:before {
     content: "Example";
     background-color: #f9f9f9;
     width: 60px;
@@ -319,34 +341,7 @@ div.codeExample:before {
     left: -1px;
 }
 
-div.jsExample:before {
-    content: "JS Example";
-    background-color: #fff;
-    width: 80px;
-    top: -11px;
-    left: -11px;
-}
-
-div.codeBlock, div.exampleOutput {
-    padding: 10px;
-}
-
-div.codeBlock {
-    background-color: #f9f9f9;
-    border-top: 1px solid #ccc;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-}
-
-.docSwatch {
-    min-height: 218.21px;
-    border: 1px solid #ccc;
-    padding: 10px 0 0 10px;
-    font-size: 12px;
-    margin-bottom: 5px;
-}
-
-.codeExample .line > div:after {
+.hg-content .codeExample .line > div:after {
     content: attr(class);
     display: block;
     min-height: 40px;
@@ -355,6 +350,34 @@ div.codeBlock {
     text-align: center;
     border-radius: 3px;
     font-size: 12px;
+}
+
+.hg-content .jsExample:before {
+    content: "JS Example";
+    background-color: #fff;
+    width: 80px;
+    top: -11px;
+    left: -11px;
+}
+
+.hg-content .codeBlock,
+.hg-content .exampleOutput {
+    padding: 10px;
+}
+
+.hg-content .codeBlock {
+    background-color: #f9f9f9;
+    border-top: 1px solid #ccc;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.hg-content .docSwatch {
+    min-height: 218.21px;
+    border: 1px solid #ccc;
+    padding: 10px 0 0 10px;
+    font-size: 12px;
+    margin-bottom: 5px;
 }
 
 table, table tr, table td, table th {
