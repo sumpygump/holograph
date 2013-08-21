@@ -39,9 +39,10 @@ class Builder
         'source'               => "./components",
         'destination'          => "./docs",
         'documentation_assets' => "./templates",
-        'build'                => "./build/css",
-        'stylesheet_include'   => "build/css/screen.css",
         'dependencies'         => array("./build"),
+        'preprocessor'         => "minify",
+        'build'                => "./build/css",
+        'main_stylesheet'      => "build/css/screen.css",
         'compat_mode'          => false,
     );
 
@@ -115,13 +116,21 @@ class Builder
     public function execute()
     {
         $files = $this->getSourceFilelist();
+
+        if (empty($files)) {
+            $this->notify("No files found to process.", Client::NOTIFY_WARNING);
+            return 1;
+        }
+
         $this->parseSourceFiles($files);
 
-        $this->compressSourceFiles($files);
+        $this->runPreprocessor($files);
 
         $this->buildPages($this->_docBlocks);
 
         $this->writeOutputFiles();
+
+        $this->notify("Done.");
     }
 
     /**
@@ -135,8 +144,8 @@ class Builder
 
         $this->notify("Reading source dir '$sourceDir'...");
 
-        $cssFiles = self::rglob("*.css", 0, $sourceDir);
-        $mdFiles = self::rglob("*.md", 0, $sourceDir);
+        $cssFiles = FileOps::rglob("*.css", 0, $sourceDir);
+        $mdFiles = FileOps::rglob("*.md", 0, $sourceDir);
 
         $files = array_merge($cssFiles, $mdFiles);
 
@@ -201,44 +210,25 @@ class Builder
     /**
      * Compress the source files as part of the build step
      *
-     * @todo: This is a simple implementation and should be replaced with a 
-     * tool like mince, minify, csscrush, csstidy or something that can minify 
-     * and combine files.
      * @param array $files Array of source files
      * @return void
      */
-    public function compressSourceFiles($files)
+    public function runPreprocessor($files)
     {
-        if (!file_exists($this->_config['build'])) {
-            passthru("mkdir -p " . escapeshellarg($this->_config['build']));
+        if ($this->_config['preprocessor'] == 'none') {
+            return;
         }
 
-        foreach ($files as $file) {
-            $extension = pathinfo($file, PATHINFO_EXTENSION);
-            if ($extension == 'md') {
-                continue;
-            }
+        $this->notify(sprintf("Running preprocessor '%s'...", $this->_config['preprocessor']));
 
-            // Move from source dir into build dir
-            $newfile = str_replace(
-                $this->_config['source'],
-                $this->_config['build'],
-                $file
-            );
+        $preprocessor = new \Holograph\Preprocessor\Css\Minify($this->_client);
 
-            $path = dirname($newfile);
-            if (!file_exists($path)) {
-                passthru("mkdir -p " . escapeshellarg($path));
-            }
+        $preprocessor->setSourceDir($this->_config['source'])
+            ->setDestinationDir($this->_config['build']);
 
-            $cmd = sprintf(
-                "cp %s %s",
-                escapeshellarg($file),
-                escapeshellarg($newfile)
-            );
-            $this->notify($cmd, Client::NOTIFY_VERBOSE);
-            passthru($cmd);
-        }
+        $preprocessor->execute(
+            array('main_stylesheet' => $this->_config['main_stylesheet'])
+        );
     }
 
     /**
@@ -408,6 +398,10 @@ class Builder
         if (count($assets) == 1
             && (!file_exists($assets[0]) || $assets[0] != $this->_config['documentation_assets'])
         ) {
+            $this->notify(
+                sprintf("Note: No additional assets found in '%s', copying default Holograph assets.", $this->_config['documentation_assets']),
+                Client::NOTIFY_MESSAGE
+            );
             $assets[] = $layoutFilename = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR
                 . 'default-templates' . DIRECTORY_SEPARATOR . 'static';
         }
@@ -442,7 +436,13 @@ class Builder
     public function getLayout()
     {
         $layoutFilename = $this->_config['documentation_assets'] . DIRECTORY_SEPARATOR . 'layout.html';
+
         if (!file_exists($layoutFilename)) {
+            $this->notify(
+                sprintf("Note: Layout file not found in '%s', using default Holograph layout instead.", $layoutFilename),
+                Client::NOTIFY_MESSAGE
+            );
+
             $layoutFilename = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR
                 . 'default-templates' . DIRECTORY_SEPARATOR . 'layout.html';
         }
@@ -450,7 +450,7 @@ class Builder
         $layout = file_get_contents($layoutFilename);
 
         $layout = str_replace("{{title}}", $this->_config['title'], $layout);
-        $layout = str_replace("{{stylesheet_include}}", $this->_config['stylesheet_include'], $layout);
+        $layout = str_replace("{{main_stylesheet}}", $this->_config['main_stylesheet'], $layout);
 
         $navigation = "";
         foreach ($this->_navigationItems as $filename => $pageName) {
@@ -511,45 +511,5 @@ class Builder
         } else {
             printf("[Holograph] %s\n", trim($message));
         }
-    }
-
-    /**
-     * Recursive Glob
-     * 
-     * @param string $pattern Pattern
-     * @param int $flags Flags to pass to glob
-     * @param string $path Path to glob in
-     * @return void
-     */
-    public static function rglob($pattern, $flags = 0, $path = '')
-    {
-        if ($path == '\\' || $path == '/') {
-            // We don't want to try to find all the paths from root
-            // It takes too long
-            return array();
-        }
-
-        if (!$path && ($dir = dirname($pattern)) != '.') {
-            if ($dir == '\\' || $dir == '/') {
-                // This means the pattern starts with root
-                // This takes too long
-                return array();
-            }
-            return self::rglob(
-                basename($pattern),
-                $flags, $dir . DIRECTORY_SEPARATOR
-            );
-        }
-
-        $paths = glob($path . '*', GLOB_ONLYDIR | GLOB_NOSORT);
-        $files = glob($path . $pattern, $flags);
-
-        foreach ($paths as $p) {
-            $files = array_merge(
-                $files, self::rglob($pattern, $flags, $p . DIRECTORY_SEPARATOR)
-            );
-        }
-
-        return $files;
     }
 }

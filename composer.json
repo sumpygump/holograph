@@ -13,7 +13,8 @@
         "php": ">=5.3",
         "sumpygump/qi-console": "1.*",
         "symfony/yaml": "2.3.3",
-        "dflydev/markdown": "1.*"
+        "dflydev/markdown": "1.*",
+        "mrclay/minify": "2.1.*"
     },
     "autoload": {
         "psr-0" : {
