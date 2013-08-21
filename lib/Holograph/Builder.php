@@ -35,12 +35,12 @@ class Builder
      * @var array
      */
     protected $_config = array(
-        'title'               => "Style Guide",
-        'source'              => "./components",
-        'destination'         => "./docs",
-        'documentationAssets' => "./templates",
-        'dependencies'        => array("./build"),
-        'compatMode'          => false,
+        'title'                => "Style Guide",
+        'source'               => "./components",
+        'destination'          => "./docs",
+        'documentation_assets' => "./templates",
+        'dependencies'         => array("./build"),
+        'compat_mode'          => false,
     );
 
     /**
@@ -319,10 +319,10 @@ class Builder
         $this->notify(sprintf("Writing to dest dir '%s'...", $destination));
 
         $markdownParser = new MarkdownRenderer();
-        $documentationAssets = $this->_config['documentationAssets'];
+        $documentationAssets = $this->_config['documentation_assets'];
 
         // Compat mode uses header and footer files. Compatible with hologram.
-        if ($this->_config['compatMode']) {
+        if ($this->_config['compat_mode']) {
             $header = $this->getHeader();
             $footer = $this->getFooter();
         } else {
@@ -337,7 +337,7 @@ class Builder
             );
             $htmlContent = $markdownParser->transform($content);
 
-            if ($this->_config['compatMode']) {
+            if ($this->_config['compat_mode']) {
                 file_put_contents($filename, $header . $htmlContent . $footer);
             } else {
                 file_put_contents($filename, str_replace("{{content}}", $htmlContent, $layout));
@@ -348,7 +348,7 @@ class Builder
         $this->notify(sprintf("Copying assets to dest dir '%s'...", $destination));
 
         $assetDirs = glob(
-            $this->_config['documentationAssets'] . DIRECTORY_SEPARATOR . '*',
+            $this->_config['documentation_assets'] . DIRECTORY_SEPARATOR . '*',
             GLOB_ONLYDIR
         );
 
@@ -390,7 +390,7 @@ class Builder
      */
     public function getLayout()
     {
-        $layoutFilename = $this->_config['documentationAssets'] . DIRECTORY_SEPARATOR . 'layout.html';
+        $layoutFilename = $this->_config['documentation_assets'] . DIRECTORY_SEPARATOR . 'layout.html';
         if (!file_exists($layoutFilename)) {
             $layoutFilename = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR
                 . 'default-templates' . DIRECTORY_SEPARATOR . 'layout.html';
@@ -418,7 +418,7 @@ class Builder
      */
     public function getHeader()
     {
-        $headerFilename = $this->_config['documentationAssets'] . DIRECTORY_SEPARATOR . 'header.html';
+        $headerFilename = $this->_config['documentation_assets'] . DIRECTORY_SEPARATOR . 'header.html';
         if (!file_exists($headerFilename)) {
             $this->notify(sprintf("Header file '%s' not found.", $headerFilename), Client::NOTIFY_WARNING);
             return '<html><head></head><body>';
@@ -436,7 +436,7 @@ class Builder
      */
     public function getFooter()
     {
-        $footerFilename = $this->_config['documentationAssets'] . DIRECTORY_SEPARATOR . 'footer.html';
+        $footerFilename = $this->_config['documentation_assets'] . DIRECTORY_SEPARATOR . 'footer.html';
         if (!file_exists($footerFilename)) {
             $this->notify(sprintf("Footer file '%s' not found.", $footerFilename), Client::NOTIFY_WARNING);
             return '</body></html>';
