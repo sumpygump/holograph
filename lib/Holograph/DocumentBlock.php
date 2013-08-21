@@ -26,7 +26,7 @@ class DocumentBlock
 {
     public $name = '';
     public $title = '';
-    public $category = '';
+    public $category = 'Index';
     public $markdown = '';
     public $outputFile = '';
     public $parent = '';
@@ -59,6 +59,11 @@ class DocumentBlock
 
         if (isset($settings['parent'])) {
             $this->parent = $settings['parent'];
+        }
+
+        // If no title was provided, use the name as the title
+        if (!$this->title) {
+            $this->title = ucfirst($this->name);
         }
 
         $this->markdown = $markdown;

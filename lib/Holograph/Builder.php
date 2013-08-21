@@ -186,7 +186,7 @@ class Builder
         }
 
         foreach ($matches[1] as $commentBlock) {
-            $block = $this->createDocumentBlock($commentBlock);
+            $block = $this->createDocumentBlock($commentBlock, $file);
             if (!$block) {
                 continue;
             }
@@ -204,10 +204,11 @@ class Builder
      * name: nameOfBlock
      * ---
      *
-     * @param string $commentBlock
+     * @param string $commentBlock Comment block from file
+     * @param string $filename Filename being parsed
      * @return false | DocumentBlock
      */
-    public function createDocumentBlock($commentBlock)
+    public function createDocumentBlock($commentBlock, $filename)
     {
         if (!preg_match("#\s*---\s(.*?)\s---$#ms", $commentBlock, $matches)) {
             return false;
@@ -217,6 +218,16 @@ class Builder
         $markdown = substr($commentBlock, $pos);
 
         $settings = Yaml::parse($matches[1]);
+
+        if (!is_array($settings)) {
+            // Invalid yml returns a string, we'll just make that be the name.
+            $this->notify(
+                sprintf("Invalid yaml found in file %s: %s", $filename, $matches[1]),
+                Client::NOTIFY_WARNING
+            );
+            $settings = array("name" => $settings);
+        }
+
         $block = new DocumentBlock($settings, $markdown);
 
         return $block;
@@ -342,6 +353,13 @@ class Builder
         );
 
         $assets = array_merge($this->_config['dependencies'], $assetDirs);
+
+	// When there are no custom template files to use, let's include
+	// holograph's default template dir.
+        if (count($assets) == 1 && !file_exists($assets[0])) {
+            $assets[] = $layoutFilename = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR
+                . 'default-templates' . DIRECTORY_SEPARATOR . 'static';
+        }
 
         foreach ($assets as $path) {
             if (file_exists($path) && is_dir($path)) {
