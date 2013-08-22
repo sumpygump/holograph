@@ -39,11 +39,29 @@ class Builder
         'source'               => "./components",
         'destination'          => "./docs",
         'documentation_assets' => "./templates",
+        'compat_mode'          => false,
         'dependencies'         => array("./build"),
         'preprocessor'         => "minify",
         'build'                => "./build/css",
         'main_stylesheet'      => "build/css/screen.css",
-        'compat_mode'          => false,
+    );
+
+    /**
+     * Config option annotations
+     *
+     * @var array
+     */
+    protected $_configAnnotations = array(
+        'title'                => "The title for this styleguide {{title}}",
+        'source'               => "The directory containing the source files to parse",
+        'destination'          => "The directory to generate files to",
+        'documentation_assets' => "Directory location of assets needed to accompany the docs (layout.html)",
+        'compat_mode'          => "Boolean indicating whether to use hologram compatibility
+When true it will expect header.html and footer.html instead of layout.html",
+        'dependencies'         => "Any other asset folders that need to be copied to the destination folder",
+        'preprocessor'         => "Build option to actually compiles CSS files (options: none, minify)",
+        'build'                => "Directory to build the final CSS files",
+        'main_stylesheet'      => "The main stylesheet to be included {{main_stylesheet}}",
     );
 
     /**
@@ -106,6 +124,27 @@ class Builder
     public function getConfig()
     {
         return $this->_config;
+    }
+
+    /**
+     * Generate config file contents annotated
+     *
+     * @return string
+     */
+    public function getConfigAnnotated()
+    {
+        $configContent = "# Holograph configuration\n";
+
+        foreach ($this->_config as $name => $value) {
+            if (isset($this->_configAnnotations[$name])) {
+                $configContent .= "\n# " . str_replace("\n", "\n# ", $this->_configAnnotations[$name]) . "\n";
+            }
+
+            $configEntry = array($name => $value);
+            $configContent .= Yaml::dump($configEntry);
+        }
+
+        return $configContent;
     }
 
     /**

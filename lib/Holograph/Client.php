@@ -182,7 +182,7 @@ class Client extends \Qi_Console_Client
         $defaultBuilder = new Builder(array(), $this);
 
         $this->notify(sprintf("Writing default configuration to config file '%s'", $this->_configFilename));
-        file_put_contents($this->_configFilename, Yaml::dump($defaultBuilder->getConfig()));
+        file_put_contents($this->_configFilename, $defaultBuilder->getConfigAnnotated());
     }
 
     /**
