@@ -117,15 +117,36 @@ body {
 }
 
 .hg-page-ft {
-    margin-top: 20px;
-    text-align: center;
     background-color: #f9f9f9;
+}
+
+.hg-page-ft-c {
+    text-align: center;
     padding: 10px 0;
 }
 
 .hg-wrapper {
     width: 1020px;
     margin: 0 auto;
+}
+
+/* ---------------------------------------------------------------------
+ Sticky Footer
+------------------------------------------------------------------------ */
+.hg-page {
+    min-height: 100%;
+}
+
+.hg-page-bd {
+    overflow: auto;
+    padding-bottom: 34px;
+}
+
+.hg-page-ft {
+    position: relative;
+    margin-top: -34px;
+    height: 34px;
+    clear: both;
 }
 
 /* ---------------------------------------------------------------------

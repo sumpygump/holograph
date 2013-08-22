@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width">
 
     <title>{{title}}</title>
-    <link rel="shortcut icon" href="static/brick.png" />
+    <link rel="shortcut icon" href="static/h-icon.png" />
 
     <!-- Styleguide CSS -->
     <link rel="stylesheet" href="static/css/doc.css">
@@ -58,37 +58,41 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="hg-page-ft">
-                <div class="hg-wrapper">
-                    <p>The source code for this style guide is licensed under the MIT license.</p>
+        <div class="hg-page-ft">
+            <div class="hg-wrapper">
+                <div class="hg-page-ft-c">
+                    <p>The source code for this style guide is licensed under the
+                        MIT license. Powered by Holograph.</p>
                 </div>
             </div>
         </div>
-    <script>
-    $(function() {
 
-      // build simple sidebar navigation
-      var $headers = $('.hg-content > h1');
-      var $componentList = $('.hg-subnav');
+        <script>
+            $(function() {
 
-      $headers.each(function() {
-        var headerText = $(this).text();
-        $(this).attr('id', headerText);
+              // build simple sidebar navigation
+              var $headers = $('.hg-content > h1');
+              var $componentList = $('.hg-subnav');
 
-        $componentList.append(
-          '<li><a href="#' + headerText + '">' + headerText + '</a></li>'
-        );
-      });
+              $headers.each(function() {
+                var headerText = $(this).text();
+                $(this).attr('id', headerText);
 
-      // set the active tab
-      var currentHref = document.location.pathname.substr(1);
-      if (currentHref) {
-        $('.docNav').find('a[href^="' + currentHref + '"]').addClass('activeNavElem typeEmphasize');
-      } else {
-        $('.docNav').find('a').eq(0).addClass('activeNavElem typeEmphasize');
-      }
-    });
+                $componentList.append(
+                  '<li><a href="#' + headerText + '">' + headerText + '</a></li>'
+                );
+              });
+
+              // set the active tab
+              var currentHref = document.location.pathname.substr(1);
+              if (currentHref) {
+                $('.docNav').find('a[href^="' + currentHref + '"]').addClass('activeNavElem typeEmphasize');
+              } else {
+                $('.docNav').find('a').eq(0).addClass('activeNavElem typeEmphasize');
+              }
+            });
         </script>
     </body>
 </html>
