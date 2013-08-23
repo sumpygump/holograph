@@ -93,7 +93,9 @@ When true it will expect header.html and footer.html instead of layout.html",
      */
     public function __construct($config, $client = null)
     {
-        $this->setClient($client);
+        if (null !== $client) {
+            $this->setClient($client);
+        }
 
         foreach ($config as $param => $value) {
             $this->_config[$param] = $value;
@@ -170,6 +172,8 @@ When true it will expect header.html and footer.html instead of layout.html",
         $this->writeOutputFiles();
 
         $this->notify("Done.");
+
+        return 0;
     }
 
     /**
@@ -237,13 +241,17 @@ When true it will expect header.html and footer.html instead of layout.html",
             return;
         }
 
+        $addedBlocks = 0;
         foreach ($matches[1] as $commentBlock) {
             $block = $this->createDocumentBlock($commentBlock, $file);
             if (!$block) {
                 continue;
             }
             $this->addDocumentBlock($block);
+            $addedBlocks++;
         }
+
+        return $addedBlocks;
     }
 
     /**
@@ -260,6 +268,8 @@ When true it will expect header.html and footer.html instead of layout.html",
 
         $this->notify(sprintf("Running preprocessor '%s'...", $this->_config['preprocessor']));
 
+        // TODO: pass in a more targeted dependency instead of the entire 
+        // client class
         $preprocessor = new \Holograph\Preprocessor\Css\Minify($this->_client);
 
         $preprocessor->setSourceDir($this->_config['source'])
@@ -547,8 +557,6 @@ When true it will expect header.html and footer.html instead of layout.html",
     {
         if ($this->_client) {
             $this->_client->notify($message, $level);
-        } else {
-            printf("[Holograph] %s\n", trim($message));
         }
     }
 }

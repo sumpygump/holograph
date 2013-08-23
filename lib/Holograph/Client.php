@@ -212,7 +212,7 @@ class Client extends \Qi_Console_Client
     {
         print Version::renderVersion();
 
-        print "A markdown based documentation system for OOCSS\n\n";
+        print "A markdown based build and documentation system for OOCSS\n\n";
         print "Usage: holograph <action> [OPTIONS]\n";
         print "\nActions:\n";
         print "  init : Initialize environment for holograph (write conf file with defaults)\n";
