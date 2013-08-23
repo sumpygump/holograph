@@ -307,6 +307,15 @@ body {
     font-family: monospace;
 }
 
+.hg-content pre * {
+    font-family: monospace;
+}
+
+.hg-content pre.prettyprint {
+    border: none;
+    padding: 0;
+}
+
 .hg-content blockquote:before {
     content: "Design Note:";
     font-weight: bold;
@@ -357,6 +366,7 @@ body {
 .hg-content .codeExample:before {
     content: "Example";
     background-color: #f9f9f9;
+    padding-left: 7px;
     width: 60px;
     top: -1px;
     left: -1px;
@@ -409,3 +419,4 @@ table, table tr, table td, table th {
 table th {
     font-weight: bold;
 }
+

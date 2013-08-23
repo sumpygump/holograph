@@ -58,12 +58,12 @@ class MarkdownRenderer extends MarkdownExtendedParser
                 . '<div class="exampleOutput">' . $matches[4] . '</div>';
             $cb .= '<div class="codeBlock">';
             $cb .= empty($matches[3]) ? "<pre" : "<pre class=\"linenums:$matches[3]\"";
-            $cb .= empty($matches[2]) ? ">" : " class=\"language-$matches[2]\">";
+            $cb .= empty($matches[2]) ? ">" : " class=\"lang-$matches[2] prettyprint\">";
             $cb .= $codeblock . "</pre>";
             $cb .= "</div></div>";
         } else {
             $cb = empty($matches[3]) ? "<pre" : "<pre class=\"linenums:$matches[3]\"";
-            $cb .= empty($matches[2]) ? ">" : " class=\"language-$matches[2]\">";
+            $cb .= empty($matches[2]) ? ">" : " class=\"lang-$matches[2] prettyprint\">";
             $cb .= "$codeblock</pre>";
         }
 
