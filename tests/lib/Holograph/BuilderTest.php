@@ -9,6 +9,7 @@ namespace Holograph\Test;
 
 use \BaseTestCase;
 use Holograph\Builder;
+use Holograph\Logger\Memory;
 
 /**
  * BuilderTest
@@ -21,13 +22,22 @@ use Holograph\Builder;
 class BuilderTest extends BaseTestCase
 {
     /**
+     * Logging object
+     *
+     * @var mixed
+     */
+    public $logger;
+
+    /**
      * Set up before test
      *
      * @return void
      */
     public function setUp()
     {
-        $this->_object = new Builder(array());
+        $this->logger = new Memory();
+
+        $this->_object = new Builder(array(), $this->logger);
     }
 
     /**
@@ -58,6 +68,7 @@ class BuilderTest extends BaseTestCase
      * Test constructor with empty array as config
      *
      * @return void
+     * @expectedException PHPUnit_Framework_Error_Warning
      */
     public function testConstructWithConfigEmpty()
     {
@@ -73,25 +84,41 @@ class BuilderTest extends BaseTestCase
     public function testConstructWithIncorrectClient()
     {
         $c = new \StdClass();
+
         $builder = new Builder(array(), $c);
     }
 
-    public function testConstructWithMockClient()
+    /**
+     * testConstructWithMockLogger
+     *
+     * @return void
+     */
+    public function testConstructWithMockLogger()
     {
         $argv = $this->getMock("Qi_Console_ArgV", array(), array(array('foo')));
+
         $terminal = $this->getMock("Qi_Console_Terminal");
 
-        $client = $this->getMock("Holograph\\Client", array(), array($argv, $terminal));
-        $client->expects($this->once())
-            ->method("notify")
+        $logger = $this->getMock(
+            "Holograph\\Logger\\Terminal", array(), array($terminal)
+        );
+
+        $logger->expects($this->once())
+            ->method("info")
             ->will($this->returnValue(null));
 
-        $builder = new Builder(array("a: b"), $client);
+        $builder = new Builder(array("a: b"), $logger);
     }
 
+    /**
+     * testGetConfig
+     *
+     * @return void
+     */
     public function testGetConfig()
     {
         $config = $this->_object->getConfig();
+
         $expected = array(
             'title'                => "Style Guide",
             'source'               => "./components",
@@ -107,19 +134,31 @@ class BuilderTest extends BaseTestCase
         $this->assertEquals($expected, $config);
     }
 
+    /**
+     * testGetConfigWhenAddedTo
+     *
+     * @return void
+     */
     public function testGetConfigWhenAddedTo()
     {
         $config = array('source' => 'FFFFFFFFF');
 
-        $builder = new Builder($config);
+        $builder = new Builder($config, $this->logger);
 
         $expected = 'FFFFFFFFF';
+
         $resultConfig = $builder->getConfig();
+
         $actual = $resultConfig['source'];
 
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * testGetConfigAnnotated
+     *
+     * @return void
+     */
     public function testGetConfigAnnotated()
     {
         $doc = $this->_object->getConfigAnnotated();
@@ -128,6 +167,11 @@ class BuilderTest extends BaseTestCase
         $this->assertContains("Directory to build the final", $doc);
     }
 
+    /**
+     * testExecute
+     *
+     * @return void
+     */
     public function testExecute()
     {
         $result = $this->_object->execute();
@@ -135,6 +179,11 @@ class BuilderTest extends BaseTestCase
         $this->assertEquals(1, $result);
     }
 
+    /**
+     * testExecuteSimple
+     *
+     * @return void
+     */
     public function testExecuteSimple()
     {
         mkdir("test-source");
@@ -148,7 +197,8 @@ class BuilderTest extends BaseTestCase
             'main_stylesheet' => 'test-build/css/screen.css',
         );
 
-        $builder = new Builder($config);
+        $builder = new Builder($config, $this->logger);
+
         $result = $builder->execute();
 
         $this->assertTrue(file_exists("test-destination/static/css/doc.css"));
@@ -157,6 +207,11 @@ class BuilderTest extends BaseTestCase
         $this->assertEquals(0, $result);
     }
 
+    /**
+     * testParseSourceFileWithoutYml
+     *
+     * @return void
+     */
     public function testParseSourceFileWithoutYml()
     {
         mkdir("test-source");
@@ -169,17 +224,24 @@ class BuilderTest extends BaseTestCase
             'main_stylesheet' => 'test-build/css/screen.css',
         );
 
-        $builder = new Builder($config);
+        $builder = new Builder($config, $this->logger);
 
-        $added = $builder->parseSourceFile('test-source/test.css');
+        $added = $builder->parseSourceStylesheetFile('test-source/test.css');
 
         $this->assertEquals(0, $added);
     }
 
+    /**
+     * testParseSourceFileWithYml
+     *
+     * @return void
+     */
     public function testParseSourceFileWithYml()
     {
         mkdir("test-source");
-        file_put_contents("test-source/test.css", "/*doc\n---\nfoobar\n---\n*/");
+        file_put_contents(
+            "test-source/test.css", "/*doc\n---\nfoobar\n---\n*/"
+        );
 
         $config = array(
             'source' => 'test-source',
@@ -188,42 +250,64 @@ class BuilderTest extends BaseTestCase
             'main_stylesheet' => 'test-build/css/screen.css',
         );
 
-        $builder = new Builder($config);
+        $builder = new Builder($config, $this->logger);
 
-        $added = $builder->parseSourceFile('test-source/test.css');
+        $added = $builder->parseSourceStylesheetFile('test-source/test.css');
 
         $this->assertEquals(1, $added);
     }
 
+    /**
+     * testRunPreprocessorWithNone
+     *
+     * @return void
+     */
     public function testRunPreprocessorWithNone()
     {
         $config = array(
             'preprocessor' => 'none',
         );
 
-        $builder = new Builder($config);
+        $builder = new Builder($config, $this->logger);
 
         $result = $builder->runPreprocessor(array());
         $this->assertNull($result);
     }
 
+    /**
+     * testCreateDocumentBlockNoMatch
+     *
+     * @return void
+     */
     public function testCreateDocumentBlockNoMatch()
     {
         $result = $this->_object->createDocumentBlock('abc', 'def');
         $this->assertFalse($result);
     }
 
+    /**
+     * testCreateDocumentBlockWithYml
+     *
+     * @return void
+     */
     public function testCreateDocumentBlockWithYml()
     {
         $block = "---\nname: foobar\n---";
+
         $result = $this->_object->createDocumentBlock($block, 'def');
 
         $this->assertEquals("Holograph\\DocumentBlock", get_class($result));
     }
 
+    /**
+     * testCreateDocumentBlockWithInvalidYml
+     *
+     * @return void
+     */
     public function testCreateDocumentBlockWithInvalidYml()
     {
         $block = "---\nhi\n---";
+
         $result = $this->_object->createDocumentBlock($block, 'def');
 
         $this->assertEquals("Holograph\\DocumentBlock", get_class($result));

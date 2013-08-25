@@ -8,6 +8,7 @@
 namespace Holograph;
 
 use Symfony\Component\Yaml\Yaml;
+use Holograph\Logger\Terminal as TerminalLogger;
 
 /**
  * Client
@@ -54,25 +55,16 @@ class Client extends \Qi_Console_Client
     const STATUS_ERROR   = 1;
 
     /**
+     * @var Holograph\Logger\Terminal
+     */
+    public $logger;
+
+    /**
      * Exit status code
      * 
      * @var float
      */
     protected $_status = self::STATUS_SUCCESS;
-
-    /**
-     * Be quiet
-     *
-     * @var mixed
-     */
-    protected $_quiet = false;
-
-    /**
-     * Verbosity level
-     *
-     * @var int
-     */
-    protected static $_verbose = false;
 
     /**
      * Default configuration filename
@@ -88,18 +80,8 @@ class Client extends \Qi_Console_Client
      */
     public function init()
     {
-        $this->setQuiet($this->_args->quiet);
-    }
-
-    /**
-     * Set quiet level
-     * 
-     * @param bool $value Value
-     * @return void
-     */
-    public function setQuiet($value)
-    {
-        $this->_quiet = (bool) $value;
+        $this->logger = new TerminalLogger($this->_terminal);
+        $this->logger->setQuiet($this->_args->quiet);
     }
 
     /**
@@ -110,7 +92,7 @@ class Client extends \Qi_Console_Client
     public function execute()
     {
         if ($this->_args->verbose) {
-            self::$_verbose = true;
+            $this->logger->setVerbose(true);
         }
 
         $action = $this->_args->action ? $this->_args->action : "help";
@@ -125,7 +107,7 @@ class Client extends \Qi_Console_Client
             return self::STATUS_SUCCESS;
         }
 
-        $this->notify("Current path: " . getcwd(), self::NOTIFY_VERBOSE);
+        $this->logger->info("Current path: " . getcwd());
 
         $configFileOverride = false;
         if ($this->_args->conf) {
@@ -138,19 +120,21 @@ class Client extends \Qi_Console_Client
 
         switch ($action) {
         case 'init':
-            $this->notify("Initializing environment for Holograph");
+            $this->logger->notice("Initializing environment for Holograph");
             $this->writeConfig();
             break;
         case 'config':
             $this->showConfig();
             break;
         case 'build':
-            $config = $this->readConfigFile($this->_configFilename, $configFileOverride);
+            $config = $this->readConfigFile(
+                $this->_configFilename, $configFileOverride
+            );
 
             if ($this->_args->compat) {
                 $config['compatMode'] = $this->_args->compat;
             }
-            $builder = new Builder($config, $this);
+            $builder = new Builder($config, $this->logger);
 
             try {
                 $builder->execute();
@@ -160,7 +144,7 @@ class Client extends \Qi_Console_Client
 
             break;
         default:
-            $this->notify("Unrecognized action '$action'", self::NOTIFY_WARNING);
+            $this->logger->warning("Unrecognized action '$action'");
             $this->_status = self::STATUS_ERROR;
             break;
         }
@@ -176,13 +160,27 @@ class Client extends \Qi_Console_Client
     public function writeConfig()
     {
         if (file_exists($this->_configFilename)) {
-            $this->_halt(sprintf("Config file already exists: '%s'", $this->_configFilename));
+            $this->_halt(
+                sprintf(
+                    "Config file already exists: '%s'",
+                    $this->_configFilename
+                )
+            );
         }
 
-        $defaultBuilder = new Builder(array(), $this);
+        $defaultBuilder = new Builder(array(), $this->logger);
 
-        $this->notify(sprintf("Writing default configuration to config file '%s'", $this->_configFilename));
-        file_put_contents($this->_configFilename, $defaultBuilder->getConfigAnnotated());
+        $this->logger->notice(
+            sprintf(
+                "Writing default configuration to config file '%s'",
+                $this->_configFilename
+            )
+        );
+
+        file_put_contents(
+            $this->_configFilename,
+            $defaultBuilder->getConfigAnnotated()
+        );
     }
 
     /**
@@ -194,7 +192,7 @@ class Client extends \Qi_Console_Client
     {
         $config = $this->readConfigFile($this->_configFilename);
 
-        $this->notify(
+        $this->logger->notice(
             sprintf(
                 "Current config: (%s)\n---------------\n%s",
                 $this->_configFilename,
@@ -203,6 +201,7 @@ class Client extends \Qi_Console_Client
         );
     }
 
+    // @codingStandardsIgnoreStart
     /**
      * Display help message
      *
@@ -227,12 +226,13 @@ class Client extends \Qi_Console_Client
         print "  --version : Display program version and exit\n";
         print "  --compat : Use hologram compatible mode (header.html/footer.html)\n";
     }
+    // @codingStandardsIgnoreEnd
 
     /**
      * Read config file
      * 
      * @param string $configFile Path to configuration file to load
-     * @param bool $throwException Whether to throw an exception if file is missing
+     * @param bool $throwException Whether to throw exception if file missing
      * @return array
      */
     public function readConfigFile($configFile, $throwException = false)
@@ -240,21 +240,24 @@ class Client extends \Qi_Console_Client
         if (!file_exists($configFile)) {
             if ($throwException) {
                 throw new \Exception(
-                    sprintf("Config file '%s' not found. (Path: %s)", $configFile, getcwd())
+                    sprintf(
+                        "Config file '%s' not found. (Path: %s)",
+                        $configFile, getcwd()
+                    )
                 );
             }
 
-            $this->notify(
+            $this->logger->warning(
                 sprintf(
-                    "Config file '%s' not found. Using default configuration. (Path: %s)",
+                    "Config file '%s' not found. "
+                    . "Using default configuration. (Path: %s)",
                     $configFile, getcwd()
-                ),
-                self::NOTIFY_WARNING
+                )
             );
             return array();
         }
 
-        $this->notify(sprintf("Using config file '%s'", $configFile), self::NOTIFY_VERBOSE);
+        $this->logger->info(sprintf("Using config file '%s'", $configFile));
 
         $config = Yaml::parse($configFile);
 
@@ -263,48 +266,5 @@ class Client extends \Qi_Console_Client
         }
 
         return $config;
-    }
-
-    /**
-     * Notify (only display if verbose)
-     *
-     * @param string $message Message
-     * @param int $level Message level
-     *      0 = warning message
-     *      1 = regular
-     *      2 = verbose
-     *      3 = action
-     * @return void
-     */
-    public function notify($message, $level = self::NOTIFY_MESSAGE)
-    {
-        switch ($level) {
-        case self::NOTIFY_WARNING:
-            $this->_displayWarning($message);
-            $this->_status = 2;
-            break;
-        case self::NOTIFY_MESSAGE:
-            if (!$this->_quiet) {
-                $this->_displayMessage($message);
-            }
-            break;
-        case self::NOTIFY_VERBOSE:
-            if (self::$_verbose && !$this->_quiet) {
-                $this->_displayMessage(">> " . $message, true, 3);
-            }
-            break;
-        default:
-            if ($this->_quiet) {
-                return;
-            }
-
-            if (substr($message, -1) != "\n") {
-                $message .= "\n";
-            }
-
-            echo $message;
-
-            break;
-        }
     }
 }

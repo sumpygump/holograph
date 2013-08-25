@@ -23,11 +23,18 @@ use Symfony\Component\Yaml\Yaml;
 class Builder
 {
     /**
-     * Client object
+     * Logger object
      *
-     * @var Holograph\Client
+     * @var Holograph\Logger\LoggerInterface
      */
-    protected $_client;
+    public $logger;
+
+    /**
+     * File io object
+     *
+     * @var Holograph\FileOps
+     */
+    public $fileio;
 
     /**
      * Configuration
@@ -46,6 +53,7 @@ class Builder
         'main_stylesheet'      => "build/css/screen.css",
     );
 
+    // @codingStandardsIgnoreStart
     /**
      * Config option annotations
      *
@@ -63,6 +71,7 @@ When true it will expect header.html and footer.html instead of layout.html",
         'build'                => "Directory to build the final CSS files",
         'main_stylesheet'      => "The main stylesheet to be included {{main_stylesheet}}",
     );
+    // @codingStandardsIgnoreEnd
 
     /**
      * Doc blocks
@@ -88,34 +97,44 @@ When true it will expect header.html and footer.html instead of layout.html",
     /**
      * Constructor
      *
-     * @param mixed $config
+     * @param array $config Configuration array
+     * @param Holograph\Logger\LoggerInterface $logger Logger
      * @return void
      */
-    public function __construct($config, $client = null)
+    public function __construct($config, $logger)
     {
-        if (null !== $client) {
-            $this->setClient($client);
-        }
+        $this->setLogger($logger);
+
+        $this->fileio = $this->createFileIo();
 
         foreach ($config as $param => $value) {
             $this->_config[$param] = $value;
         }
 
-        $this->notify(
-            "Using configuration:\n" . Yaml::dump($this->_config),
-            Client::NOTIFY_VERBOSE
+        $this->logger->info(
+            "Using configuration:\n" . Yaml::dump($this->_config)
         );
     }
 
     /**
-     * Set client object
+     * Create new fileio object
      *
-     * @param Client $client
+     * @return FileOps
+     */
+    public function createFileIo()
+    {
+        return new FileOps();
+    }
+
+    /**
+     * Set logging object
+     *
+     * @param Logger\LoggerInterface $logger Logger object
      * @return void
      */
-    public function setClient(Client $client)
+    public function setLogger(Logger\LoggerInterface $logger)
     {
-        $this->_client = $client;
+        $this->logger = $logger;
     }
 
     /**
@@ -139,10 +158,14 @@ When true it will expect header.html and footer.html instead of layout.html",
 
         foreach ($this->_config as $name => $value) {
             if (isset($this->_configAnnotations[$name])) {
-                $configContent .= "\n# " . str_replace("\n", "\n# ", $this->_configAnnotations[$name]) . "\n";
+                $annotation = $this->_configAnnotations[$name];
+
+                $configContent .= "\n# "
+                    . str_replace("\n", "\n# ", $annotation) . "\n";
             }
 
             $configEntry = array($name => $value);
+
             $configContent .= Yaml::dump($configEntry);
         }
 
@@ -156,22 +179,25 @@ When true it will expect header.html and footer.html instead of layout.html",
      */
     public function execute()
     {
-        $files = $this->getSourceFilelist();
+        $cssFiles = $this->getSourceFilelist('*.css');
 
-        if (empty($files)) {
-            $this->notify("No files found to process.", Client::NOTIFY_WARNING);
+        if (empty($cssFiles)) {
+            $this->logger->warning("No files found to process.");
             return 1;
         }
 
-        $this->parseSourceFiles($files);
+        $this->parseSourceFiles($cssFiles);
 
-        $this->runPreprocessor($files);
+        $mdFiles = $this->getSourceFilelist('*.md');
+        $this->parseSourceFiles($mdFiles);
+
+        $this->runPreprocessor($cssFiles);
 
         $this->buildPages($this->_docBlocks);
 
         $this->writeOutputFiles();
 
-        $this->notify("Done.");
+        $this->logger->notice("Done.");
 
         return 0;
     }
@@ -179,24 +205,23 @@ When true it will expect header.html and footer.html instead of layout.html",
     /**
      * Get a list of files from source directory
      *
+     * @param string $pattern File pattern to find
      * @return array
      */
-    public function getSourceFilelist()
+    public function getSourceFilelist($pattern = "*.css")
     {
         $sourceDir = $this->_config['source'];
 
-        $this->notify("Reading source dir '$sourceDir'...");
+        $this->logger->notice(
+            "Reading source dir '$sourceDir' for '$pattern'..."
+        );
 
-        $cssFiles = FileOps::rglob("*.css", 0, $sourceDir);
-        $mdFiles = FileOps::rglob("*.md", 0, $sourceDir);
-
-        $files = array_merge($cssFiles, $mdFiles);
+        $files = FileOps::rglob($pattern, 0, $sourceDir);
 
         sort($files);
 
-        $this->notify(
-            sprintf("Found %s files in source dir", count($files)),
-            Client::NOTIFY_VERBOSE
+        $this->logger->info(
+            sprintf("Found %s files in source dir", count($files))
         );
 
         return $files;
@@ -212,14 +237,32 @@ When true it will expect header.html and footer.html instead of layout.html",
     {
         foreach ($files as $file) {
             $extension = pathinfo($file, PATHINFO_EXTENSION);
-            if ($extension == 'md') {
-                $this->notify(sprintf("Reading file '%s'", $file), Client::NOTIFY_VERBOSE);
-                $filename = pathinfo($file, PATHINFO_FILENAME) . ".html";
-                $this->_pages[$filename] = file_get_contents($file);
-            } else {
-                $this->parseSourceFile($file);
+
+            switch($extension) {
+            case 'md':
+                $this->parseSourceDocFile($file);
+                break;
+            case 'css':
+                $this->parseSourceStylesheetFile($file);
+                break;
             }
         }
+    }
+
+    /**
+     * Parse a documentation source file (markdown)
+     *
+     * @param string $file Filename
+     * @return void
+     */
+    public function parseSourceDocFile($file)
+    {
+        $this->logger->info(sprintf("Reading file '%s'", $file));
+
+        $filename = pathinfo($file, PATHINFO_FILENAME) . ".html";
+
+        $contents = $this->fileio->readFile($file);
+        $this->addToPage($filename, $contents);
     }
 
     /**
@@ -228,15 +271,16 @@ When true it will expect header.html and footer.html instead of layout.html",
      * @param string $file Filename
      * @return void
      */
-    public function parseSourceFile($file)
+    public function parseSourceStylesheetFile($file)
     {
-        $this->notify("Reading file '$file'", Client::NOTIFY_VERBOSE);
-        $contents = file_get_contents($file);
+        $this->logger->info("Reading file '$file'");
+        $contents = $this->fileio->readFile($file);
 
         // Find all the desired commment blocks (/*doc ... */)
         $commentBlockCount = preg_match_all(
             "#^\s*/\*doc(.*?)\*/#ms", $contents, $matches
         );
+
         if (!$commentBlockCount) {
             return;
         }
@@ -266,11 +310,13 @@ When true it will expect header.html and footer.html instead of layout.html",
             return;
         }
 
-        $this->notify(sprintf("Running preprocessor '%s'...", $this->_config['preprocessor']));
+        $this->logger->notice(
+            sprintf(
+                "Running preprocessor '%s'...", $this->_config['preprocessor']
+            )
+        );
 
-        // TODO: pass in a more targeted dependency instead of the entire 
-        // client class
-        $preprocessor = new \Holograph\Preprocessor\Css\Minify($this->_client);
+        $preprocessor = new \Holograph\Preprocessor\Css\Minify();
 
         $preprocessor->setSourceDir($this->_config['source'])
             ->setDestinationDir($this->_config['build']);
@@ -303,15 +349,16 @@ When true it will expect header.html and footer.html instead of layout.html",
         }
 
         $pos = strlen($matches[0]);
+        $yml = $matches[1];
+
         $markdown = substr($commentBlock, $pos);
 
-        $settings = Yaml::parse($matches[1]);
+        $settings = Yaml::parse($yml);
 
         if (!is_array($settings)) {
             // Invalid yml returns a string, we'll just make that be the name.
-            $this->notify(
-                sprintf("Invalid yaml found in file %s: %s", $filename, $matches[1]),
-                Client::NOTIFY_WARNING
+            $this->logger->warning(
+                sprintf("Invalid yaml found in file %s: %s", $filename, $yml)
             );
             $settings = array("name" => $settings);
         }
@@ -338,9 +385,11 @@ When true it will expect header.html and footer.html instead of layout.html",
                 . $documentBlock->markdown;
 
             if (isset($this->_docBlocks[$documentBlock->name])) {
-                $this->notify(
-                    sprintf("Warning: Overwriting block with name '%s'", $documentBlock->name),
-                    Client::NOTIFY_WARNING
+                $this->logger->warning(
+                    sprintf(
+                        "Warning: Overwriting block with name '%s'",
+                        $documentBlock->name
+                    )
                 );
             }
 
@@ -349,7 +398,8 @@ When true it will expect header.html and footer.html instead of layout.html",
             // child block
             if (isset($this->_docBlocks[$documentBlock->parent])) {
                 // Prepend the title as markdown sub-heading
-                $documentBlock->markdown = "\n\n## " . $documentBlock->title . "\n"
+                $documentBlock->markdown = "\n\n## "
+                    . $documentBlock->title . "\n"
                     . $documentBlock->markdown;
 
                 $parentBlock = $this->_docBlocks[$documentBlock->parent];
@@ -364,8 +414,8 @@ When true it will expect header.html and footer.html instead of layout.html",
     /**
      * Build the pages array
      *
-     * @param mixed $docBlocks
-     * @param string $outputFile
+     * @param array $docBlocks Array of document blocks
+     * @param string $outputFile Output filename
      * @return void
      */
     public function buildPages($docBlocks, $outputFile = '')
@@ -373,22 +423,39 @@ When true it will expect header.html and footer.html instead of layout.html",
         foreach ($docBlocks as $documentBlock) {
             if ($documentBlock->outputFile) {
                 $pageName = $documentBlock->outputFile;
-                $outputFile = strtolower(trim($documentBlock->outputFile . ".html"));
+
+                $outputFile = strtolower(
+                    trim($documentBlock->outputFile . ".html")
+                );
                 $outputFile = str_replace(' ', '_', $outputFile);
 
                 $this->_navigationItems[$outputFile] = $pageName;
             }
 
-            if (!isset($this->_pages[$outputFile])) {
-                $this->_pages[$outputFile] = '';
-            }
-
-            $this->_pages[$outputFile] .= "\n" . $documentBlock->markdown;
+            $this->addToPage($outputFile, $documentBlock->markdown);
 
             if ($documentBlock->children) {
                 $this->buildPages($documentBlock->children, $outputFile);
             }
         }
+    }
+
+    /**
+     * Add contents to a page
+     *
+     * @param string $outputFile Page output name
+     * @param string $content Content
+     * @return void
+     */
+    public function addToPage($outputFile, $content)
+    {
+        if (!isset($this->_pages[$outputFile])) {
+            $this->_pages[$outputFile] = '';
+        }
+
+        $this->_pages[$outputFile] .= "\n" . $content;
+
+        return $this->_pages;
     }
 
     /**
@@ -404,9 +471,12 @@ When true it will expect header.html and footer.html instead of layout.html",
             mkdir($destination);
         }
 
-        $this->notify(sprintf("Writing to dest dir '%s'...", $destination));
+        $this->logger->notice(
+            sprintf("Writing to dest dir '%s'...", $destination)
+        );
 
         $markdownParser = new MarkdownRenderer();
+
         $documentationAssets = $this->_config['documentation_assets'];
 
         // Compat mode uses header and footer files. Compatible with hologram.
@@ -419,21 +489,22 @@ When true it will expect header.html and footer.html instead of layout.html",
 
         foreach ($this->_pages as $filename => $content) {
             $filename = $destination . DIRECTORY_SEPARATOR . $filename;
-            $this->notify(
-                sprintf("Writing file '%s'", $filename),
-                Client::NOTIFY_VERBOSE
-            );
+            $this->logger->info(sprintf("Writing file '%s'", $filename));
             $htmlContent = $markdownParser->transform($content);
 
             if ($this->_config['compat_mode']) {
-                file_put_contents($filename, $header . $htmlContent . $footer);
+                $contents = $header . $htmlContent . $footer;
+                $this->fileio->writeFile($filename, $contents);
             } else {
-                file_put_contents($filename, str_replace("{{content}}", $htmlContent, $layout));
+                $contents = str_replace("{{content}}", $htmlContent, $layout);
+                $this->fileio->writeFile($filename, $contents);
             }
         }
 
         // Copy templates/* and dependencies to destination dir
-        $this->notify(sprintf("Copying assets to dest dir '%s'...", $destination));
+        $this->logger->notice(
+            sprintf("Copying assets to dest dir '%s'...", $destination)
+        );
 
         $assetDirs = glob(
             $this->_config['documentation_assets'] . DIRECTORY_SEPARATOR . '*',
@@ -445,13 +516,18 @@ When true it will expect header.html and footer.html instead of layout.html",
         // When there are no custom template files to use, let's include
         // holograph's default template dir.
         if (count($assets) == 1
-            && (!file_exists($assets[0]) || $assets[0] != $this->_config['documentation_assets'])
+            && (!file_exists($assets[0])
+            || $assets[0] != $this->_config['documentation_assets'])
         ) {
-            $this->notify(
-                sprintf("Note: No additional assets found in '%s', copying default Holograph assets.", $this->_config['documentation_assets']),
-                Client::NOTIFY_MESSAGE
+            $this->logger->warning(
+                sprintf(
+                    "Note: No additional assets found in '%s', "
+                    . "copying default Holograph assets.",
+                    $this->_config['documentation_assets']
+                )
             );
-            $assets[] = $layoutFilename = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR
+
+            $assets[] = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR
                 . 'default-templates' . DIRECTORY_SEPARATOR . 'static';
         }
 
@@ -461,17 +537,21 @@ When true it will expect header.html and footer.html instead of layout.html",
 
                 $cmd = sprintf(
                     "rm -rf %s",
-                    escapeshellarg($destination . DIRECTORY_SEPARATOR . $basename)
+                    escapeshellarg(
+                        $destination . DIRECTORY_SEPARATOR . $basename
+                    )
                 );
-                $this->notify($cmd, Client::NOTIFY_VERBOSE);
+                $this->logger->info($cmd);
                 passthru($cmd);
 
                 $cmd = sprintf(
                     "cp -r %s %s",
                     escapeshellarg($path),
-                    escapeshellarg($destination . DIRECTORY_SEPARATOR . $basename)
+                    escapeshellarg(
+                        $destination . DIRECTORY_SEPARATOR . $basename
+                    )
                 );
-                $this->notify($cmd, Client::NOTIFY_VERBOSE);
+                $this->logger->info($cmd);
                 passthru($cmd);
             }
         }
@@ -484,26 +564,36 @@ When true it will expect header.html and footer.html instead of layout.html",
      */
     public function getLayout()
     {
-        $layoutFilename = $this->_config['documentation_assets'] . DIRECTORY_SEPARATOR . 'layout.html';
+        $layoutFilename = $this->_config['documentation_assets']
+            . DIRECTORY_SEPARATOR . 'layout.html';
 
         if (!file_exists($layoutFilename)) {
-            $this->notify(
-                sprintf("Note: Layout file not found in '%s', using default Holograph layout instead.", $layoutFilename),
-                Client::NOTIFY_MESSAGE
+            $this->logger->warning(
+                sprintf(
+                    "Note: Layout file not found in '%s', "
+                    . "using default Holograph layout instead.",
+                    $layoutFilename
+                )
             );
 
             $layoutFilename = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR
                 . 'default-templates' . DIRECTORY_SEPARATOR . 'layout.html';
         }
 
-        $layout = file_get_contents($layoutFilename);
+        $layout = $this->fileio->readFile($layoutFilename);
 
         $layout = str_replace("{{title}}", $this->_config['title'], $layout);
-        $layout = str_replace("{{main_stylesheet}}", $this->_config['main_stylesheet'], $layout);
+        $layout = str_replace(
+            "{{main_stylesheet}}",
+            $this->_config['main_stylesheet'],
+            $layout
+        );
 
         $navigation = "";
         foreach ($this->_navigationItems as $filename => $pageName) {
-            $navigation .= sprintf('<li><a href="%s">%s</a></li>', $filename, $pageName) . "\n";
+            $navigation .= sprintf(
+                '<li><a href="%s">%s</a></li>', $filename, $pageName
+            ) . "\n";
         }
         $layout = str_replace("{{navigation}}", $navigation, $layout);
 
@@ -519,13 +609,17 @@ When true it will expect header.html and footer.html instead of layout.html",
      */
     public function getHeader()
     {
-        $headerFilename = $this->_config['documentation_assets'] . DIRECTORY_SEPARATOR . 'header.html';
+        $headerFilename = $this->_config['documentation_assets']
+            . DIRECTORY_SEPARATOR . 'header.html';
+
         if (!file_exists($headerFilename)) {
-            $this->notify(sprintf("Header file '%s' not found.", $headerFilename), Client::NOTIFY_WARNING);
+            $this->logger->warning(
+                sprintf("Header file '%s' not found.", $headerFilename)
+            );
             return '<html><head></head><body>';
         }
 
-        return file_get_contents($headerFilename);
+        return $this->fileio->readFile($headerFilename);
     }
 
     /**
@@ -537,26 +631,16 @@ When true it will expect header.html and footer.html instead of layout.html",
      */
     public function getFooter()
     {
-        $footerFilename = $this->_config['documentation_assets'] . DIRECTORY_SEPARATOR . 'footer.html';
+        $footerFilename = $this->_config['documentation_assets']
+            . DIRECTORY_SEPARATOR . 'footer.html';
+
         if (!file_exists($footerFilename)) {
-            $this->notify(sprintf("Footer file '%s' not found.", $footerFilename), Client::NOTIFY_WARNING);
+            $this->logger->warning(
+                sprintf("Footer file '%s' not found.", $footerFilename)
+            );
             return '</body></html>';
         }
 
-        return file_get_contents($footerFilename);
-    }
-
-    /**
-     * Notify
-     *
-     * @param mixed $message
-     * @param int $level
-     * @return void
-     */
-    public function notify($message, $level = Client::NOTIFY_MESSAGE)
-    {
-        if ($this->_client) {
-            $this->_client->notify($message, $level);
-        }
+        return $this->fileio->readFile($footerFilename);
     }
 }

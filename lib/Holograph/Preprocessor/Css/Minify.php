@@ -1,11 +1,14 @@
 <?php
+/**
+ * Minify CSS Preprocessor class file
+ *
+ * @package Holograph
+ */
 
 namespace Holograph\Preprocessor\Css;
 
 use Holograph\Preprocessor\PreprocessorAbstract;
 use Holograph\FileOps;
-
-//include_once 'lib/Minify/CSS/Compressor.php';
 
 /**
  * Class to minify and combine Css files
@@ -40,6 +43,7 @@ class Minify extends PreprocessorAbstract
         $buffer = array();
         foreach ($cssFiles as $file) {
             $content = file_get_contents($file);
+
             $newContent = \Minify_CSS_Compressor::process($content);
 
             $newfile = str_replace(

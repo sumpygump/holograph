@@ -50,20 +50,33 @@ class MarkdownRenderer extends MarkdownExtendedParser
     {
         $codeblock = $matches[4];
         $codeblock = htmlspecialchars($codeblock, ENT_NOQUOTES);
-        $codeblock = preg_replace_callback('/^\n+/',
-            array(&$this, '_doFencedCodeBlocks_newlines'), $codeblock);
+
+        $codeblock = preg_replace_callback(
+            '/^\n+/',
+            array(&$this, '_doFencedCodeBlocks_newlines'),
+            $codeblock
+        );
 
         if (strpos($matches[2], 'example')) {
             $cb = '<div class="codeExample">'
                 . '<div class="exampleOutput">' . $matches[4] . '</div>';
+
             $cb .= '<div class="codeBlock">';
-            $cb .= empty($matches[3]) ? "<pre" : "<pre class=\"linenums:$matches[3]\"";
-            $cb .= empty($matches[2]) ? ">" : " class=\"lang-$matches[2] prettyprint\">";
+            $cb .= empty($matches[3])
+                ? "<pre" : "<pre class=\"linenums:$matches[3]\"";
+
+            $cb .= empty($matches[2])
+                ? ">" : " class=\"lang-$matches[2] prettyprint\">";
+
             $cb .= $codeblock . "</pre>";
             $cb .= "</div></div>";
         } else {
-            $cb = empty($matches[3]) ? "<pre" : "<pre class=\"linenums:$matches[3]\"";
-            $cb .= empty($matches[2]) ? ">" : " class=\"lang-$matches[2] prettyprint\">";
+            $cb = empty($matches[3])
+                ? "<pre" : "<pre class=\"linenums:$matches[3]\"";
+
+            $cb .= empty($matches[2])
+                ? ">" : " class=\"lang-$matches[2] prettyprint\">";
+
             $cb .= "$codeblock</pre>";
         }
 

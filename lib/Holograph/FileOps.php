@@ -17,6 +17,29 @@ namespace Holograph;
 class FileOps
 {
     /**
+     * Read file from disk
+     *
+     * @param string $filename Filename
+     * @return string
+     */
+    public function readFile($filename)
+    {
+        return file_get_contents($filename);
+    }
+
+    /**
+     * Write file to disk
+     *
+     * @param string $filename Filename
+     * @param string $contents Contents of file to write
+     * @return bool
+     */
+    public function writeFile($filename, $contents)
+    {
+        return file_put_contents($filename, $contents);
+    }
+
+    /**
      * Recursive Glob
      * 
      * @param string $pattern Pattern

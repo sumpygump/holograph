@@ -1,4 +1,5 @@
 <?php
+// @codingStandardsIgnoreFile
 /**
  * Markdown extended parser
  *
@@ -34,7 +35,7 @@ class MarkdownExtendedParser extends MarkdownExtraParser
     /**
      * Constructor
      *
-     * @param array $configuration
+     * @param array $configuration Configuration array
      * @return void
      */
     public function __construct(array $configuration = null)
@@ -49,7 +50,7 @@ class MarkdownExtendedParser extends MarkdownExtraParser
     /**
      * Transform
      *
-     * @param mixed $text
+     * @param string $text Text to transform
      * @return void
      */
     public function transform($text)
@@ -66,13 +67,14 @@ class MarkdownExtendedParser extends MarkdownExtraParser
      */
     public function doBlockQuotes($text)
     {
-        $text = preg_replace_callback('/
-            (?>^[ ]*>[ ]?
+        $text = preg_replace_callback(
+            '/(?>^[ ]*>[ ]?
                 (?:\((.+?)\))?
                 [ ]*(.+\n(?:.+\n)*)
-            )+
-            /xm',
-            array(&$this, '_doBlockQuotes_callback'), $text);
+            )+/xm',
+            array(&$this, '_doBlockQuotes_callback'),
+            $text
+        );
 
         return $text;
     }
@@ -222,4 +224,3 @@ class MarkdownExtendedParser extends MarkdownExtraParser
         return "\n". $this->hashBlock($res)."\n\n";
     }
 }
-

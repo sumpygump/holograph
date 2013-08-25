@@ -17,13 +17,6 @@ namespace Holograph\Preprocessor;
 abstract class PreprocessorAbstract
 {
     /**
-     * Holograph client
-     *
-     * @var \Holograph\Client
-     */
-    protected $_client;
-
-    /**
      * Source directory
      *
      * @var string
@@ -36,17 +29,6 @@ abstract class PreprocessorAbstract
      * @var string
      */
     protected $_destinationDir = '';
-
-    /**
-     * Constructor
-     *
-     * @param \Holograph\Client $client
-     * @return void
-     */
-    public function __construct($client)
-    {
-        $this->_client = $client;
-    }
 
     /**
      * Set source directory
@@ -95,6 +77,7 @@ abstract class PreprocessorAbstract
     /**
      * Execute
      *
+     * @param array $options Options array to pass during execution
      * @return void
      */
     abstract public function execute($options = array());

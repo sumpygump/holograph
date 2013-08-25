@@ -24,12 +24,53 @@ namespace Holograph;
  */
 class DocumentBlock
 {
+    /**
+     * Name of this block
+     *
+     * @var string
+     */
     public $name = '';
+
+    /**
+     * Title for this block
+     *
+     * @var string
+     */
     public $title = '';
+
+    /**
+     * Category for this block
+     *
+     * @var string
+     */
     public $category = 'Index';
+
+    /**
+     * The markdown documentation content for this block
+     *
+     * @var string
+     */
     public $markdown = '';
+
+    /**
+     * Output filename for this block
+     *
+     * @var string
+     */
     public $outputFile = '';
+
+    /**
+     * The parent block name (for a child block)
+     *
+     * @var string
+     */
     public $parent = '';
+
+    /**
+     * Child Document Blocks
+     *
+     * @var array
+     */
     public $children = array();
 
     /**
@@ -42,7 +83,9 @@ class DocumentBlock
     public function __construct($settings, $markdown)
     {
         if (!isset($settings['name'])) {
-            throw new \Exception("Required parameter 'name' not found in comment block.");
+            throw new \Exception(
+                "Required parameter 'name' not found in comment block."
+            );
         }
 
         if ($settings['name']) {
