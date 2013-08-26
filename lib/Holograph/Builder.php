@@ -152,9 +152,17 @@ When true it will expect header.html and footer.html instead of layout.html",
      *
      * @return array
      */
-    public function getConfig()
+    public function getConfig($value = null)
     {
-        return $this->_config;
+        if (null == $value) {
+            return $this->_config;
+        }
+
+        if (isset($this->_config[$value])) {
+            return $this->_config[$value];
+        }
+
+        return '';
     }
 
     /**
