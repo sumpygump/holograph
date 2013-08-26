@@ -117,6 +117,16 @@ When true it will expect header.html and footer.html instead of layout.html",
     }
 
     /**
+     * Get doc blocks
+     *
+     * @return void
+     */
+    public function getDocBlocks()
+    {
+        return $this->_docBlocks;
+    }
+
+    /**
      * Create new fileio object
      *
      * @return FileOps
@@ -262,6 +272,11 @@ When true it will expect header.html and footer.html instead of layout.html",
         $filename = pathinfo($file, PATHINFO_FILENAME) . ".html";
 
         $contents = $this->fileio->readFile($file);
+
+        $pagename = ucfirst(str_replace('.md', '', basename($file)));
+
+        $this->_navigationItems[$filename] = $pagename;
+
         $this->addToPage($filename, $contents);
     }
 
@@ -438,6 +453,8 @@ When true it will expect header.html and footer.html instead of layout.html",
                 $this->buildPages($documentBlock->children, $outputFile);
             }
         }
+
+        return $this->_pages;
     }
 
     /**
