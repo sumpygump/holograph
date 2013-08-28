@@ -312,4 +312,89 @@ class BuilderTest extends BaseTestCase
 
         $this->assertEquals("Holograph\\DocumentBlock", get_class($result));
     }
+
+    /**
+     * testAddDocumentBlock
+     *
+     * @return void
+     */
+    public function testAddDocumentBlock()
+    {
+        $documentBlock = new \Holograph\DocumentBlock(array('name' => 'b'), 'foo.txt');
+
+        $this->_object->addDocumentBlock($documentBlock);
+
+        $blocks = $this->_object->getDocBlocks();
+
+        $block = array_pop($blocks);
+
+        $this->assertEquals('b', $block->name);
+    }
+
+    /**
+     * testAddDocumentBlockAlreadyAdded
+     *
+     * @return void
+     */
+    public function testAddDocumentBlockAlreadyAdded()
+    {
+        $documentBlock = new \Holograph\DocumentBlock(array('name' => 'b'), 'foo1.txt');
+        $documentBlock2 = new \Holograph\DocumentBlock(array('name' => 'b'), 'foo1.txt');
+
+        $this->_object->addDocumentBlock($documentBlock);
+        $this->_object->addDocumentBlock($documentBlock2);
+
+        $blocks = $this->_object->getDocBlocks();
+
+        $block = array_pop($blocks);
+
+        $this->assertEquals('b', $block->name);
+
+        $messages = $this->logger->getMessages();
+        $warning = array_pop($messages['warning']);
+
+        $this->assertContains("Warning: Overwriting block with name", $warning);
+    }
+
+    /**
+     * testAddDocumentBlockChild
+     *
+     * @return void
+     */
+    public function testAddDocumentBlockChild()
+    {
+        $documentBlock = new \Holograph\DocumentBlock(array('name' => 'a'), 'foo1.txt');
+        $documentBlock2 = new \Holograph\DocumentBlock(array('name' => 'b', 'parent' => 'a'), 'foo1.txt');
+
+        $this->_object->addDocumentBlock($documentBlock);
+        $this->_object->addDocumentBlock($documentBlock2);
+
+        $blocks = $this->_object->getDocBlocks();
+
+        $blockParent = array_pop($blocks);
+
+        $this->assertEquals('a', $blockParent->name);
+        $this->assertEquals(array('b' => $documentBlock2), $blockParent->children);
+    }
+
+    /**
+     * testAddDocumentBlockChildWhenParentDoesntExist
+     *
+     * @return void
+     */
+    public function testAddDocumentBlockChildWhenParentDoesntExist()
+    {
+        $documentBlock = new \Holograph\DocumentBlock(array('name' => 'a'), 'foo1.txt');
+        $documentBlock2 = new \Holograph\DocumentBlock(array('name' => 'b', 'parent' => 'x'), 'foo1.txt');
+
+        $this->_object->addDocumentBlock($documentBlock);
+        $this->_object->addDocumentBlock($documentBlock2);
+
+        $blocks = $this->_object->getDocBlocks();
+
+        $blockParent = array_pop($blocks);
+
+        $this->assertEquals('x', $blockParent->name);
+        $this->assertEquals(array('b' => $documentBlock2), $blockParent->children);
+    }
 }

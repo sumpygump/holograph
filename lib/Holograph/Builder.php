@@ -429,7 +429,13 @@ When true it will expect header.html and footer.html instead of layout.html",
 
                 $parentBlock->children[$documentBlock->name] = $documentBlock;
             } else {
-                $this->_docBlocks[$documentBlock->parent] = new DocumentBlock();
+                $parentSettings = array(
+                    'name' => $documentBlock->parent,
+                );
+                $parentBlock = new DocumentBlock($parentSettings, $documentBlock->parent);
+                $parentBlock->children[$documentBlock->name] = $documentBlock;
+
+                $this->_docBlocks[$documentBlock->parent] = $parentBlock;
             }
         }
     }

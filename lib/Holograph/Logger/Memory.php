@@ -71,4 +71,14 @@ class Memory implements LoggerInterface
     {
         $this->_messages['info'][] = $message;
     }
+
+    /**
+     * Get messages
+     *
+     * @return void
+     */
+    public function getMessages()
+    {
+        return $this->_messages;
+    }
 }
