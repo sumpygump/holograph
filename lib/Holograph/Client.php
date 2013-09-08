@@ -143,6 +143,29 @@ class Client extends \Qi_Console_Client
             }
 
             break;
+        case 'live':
+            $config = $this->readConfigFile(
+                $this->_configFilename, $configFileOverride
+            );
+
+            $autoloadPath = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR;
+            if (!file_exists($autoloadPath . 'vendor/autoload.php')) {
+                $autoloadPath = dirname(dirname(dirname(dirname($autoloadPath))));
+            }
+
+            $indexContents = "<?php\n";
+            $indexContents .= sprintf("/* Holograph Live\nGenerated %s\n*/\n", date("Y-m-d H:i:s"));
+            $indexContents .= sprintf("require_once '%s/vendor/autoload.php';\n", $autoloadPath);
+            $indexContents .= "\$contents = \\Holograph\\Live::reload(\$_SERVER['REQUEST_URI']);\n";
+            $indexContents .= "print \$contents;\n";
+
+            $fileio = new FileOps();
+            $fileio->writeFile($config['destination'] . DIRECTORY_SEPARATOR . "index.php", $indexContents);
+
+            $serverCmd = 'php -S localhost:8000 -t ' . $config['destination'];
+            $this->logger->info($serverCmd);
+            passthru($serverCmd);
+            break;
         default:
             $this->logger->warning("Unrecognized action '$action'");
             $this->_status = self::STATUS_ERROR;

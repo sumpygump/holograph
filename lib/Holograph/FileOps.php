@@ -17,6 +17,17 @@ namespace Holograph;
 class FileOps
 {
     /**
+     * Check whether file exists
+     *
+     * @param string $filename Filename to check
+     * @return bool
+     */
+    public function fileExists($filename)
+    {
+        return file_exists($filename);
+    }
+
+    /**
      * Read file from disk
      *
      * @param string $filename Filename

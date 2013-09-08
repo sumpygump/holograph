@@ -104,6 +104,10 @@ class DocumentBlock
             $this->parent = $settings['parent'];
         }
 
+        if (isset($settings['outputFile'])) {
+            $this->outputFile = $settings['outputFile'];
+        }
+
         // If no title was provided, use the name as the title
         if (!$this->title) {
             $this->title = ucfirst($this->name);

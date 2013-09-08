@@ -445,20 +445,26 @@ When true it will expect header.html and footer.html instead of layout.html",
      *
      * @param array $docBlocks Array of document blocks
      * @param string $outputFile Output filename
-     * @return void
+     * @return array
      */
     public function buildPages($docBlocks, $outputFile = '')
     {
         foreach ($docBlocks as $documentBlock) {
             if ($documentBlock->outputFile) {
                 $pageName = $documentBlock->outputFile;
+                $outputFile = strtolower(trim($pageName));
 
-                $outputFile = strtolower(
-                    trim($documentBlock->outputFile . ".html")
-                );
+                if (strpos($outputFile, '.html') === false) {
+                    $outputFile .= ".html";
+                }
+
                 $outputFile = str_replace(' ', '_', $outputFile);
 
                 $this->_navigationItems[$outputFile] = $pageName;
+            }
+
+            if ($outputFile == '') {
+                $outputFile = "index.html";
             }
 
             $this->addToPage($outputFile, $documentBlock->markdown);
@@ -643,7 +649,7 @@ When true it will expect header.html and footer.html instead of layout.html",
         $headerFilename = $this->_config['documentation_assets']
             . DIRECTORY_SEPARATOR . 'header.html';
 
-        if (!file_exists($headerFilename)) {
+        if (!$this->fileio->fileExists($headerFilename)) {
             $this->logger->warning(
                 sprintf("Header file '%s' not found.", $headerFilename)
             );

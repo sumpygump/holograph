@@ -155,6 +155,42 @@ class BuilderTest extends BaseTestCase
     }
 
     /**
+     * testGetConfigOneItem
+     *
+     * @return void
+     */
+    public function testGetConfigOneItem()
+    {
+        $config = array('source' => 'FFFFFFFFF');
+
+        $builder = new Builder($config, $this->logger);
+
+        $expected = 'FFFFFFFFF';
+
+        $actual = $builder->getConfig('source');
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * testConfigForItemNotExist
+     *
+     * @return void
+     */
+    public function testConfigForItemNotExist()
+    {
+        $config = array('source' => 'FFFFFFFFF');
+
+        $builder = new Builder($config, $this->logger);
+
+        $expected = '';
+
+        $actual = $builder->getConfig('foobar');
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
      * testGetConfigAnnotated
      *
      * @return void
@@ -396,5 +432,82 @@ class BuilderTest extends BaseTestCase
 
         $this->assertEquals('x', $blockParent->name);
         $this->assertEquals(array('b' => $documentBlock2), $blockParent->children);
+    }
+
+    public function testBuildPages()
+    {
+        $block = new \Holograph\DocumentBlock(array('name' => 'a'), 'foo1.txt');
+
+        $blocks = array($block);
+
+        $pages = $this->_object->buildPages($blocks);
+
+        $expected = array(
+            'index.html' => "\nfoo1.txt",
+        );
+        $this->assertEquals($expected, $pages);
+    }
+
+    public function testBuildPagesMultiple()
+    {
+        $blockA = new \Holograph\DocumentBlock(array('name' => 'a'), 'foo1');
+        $blockB = new \Holograph\DocumentBlock(array('name' => 'b'), 'foo2');
+
+        $blocks = array($blockA, $blockB);
+
+        $pages = $this->_object->buildPages($blocks);
+
+        $expected = array(
+            'index.html' => "\nfoo1\nfoo2",
+        );
+        $this->assertEquals($expected, $pages);
+    }
+
+    public function testBuildPagesOutputFilePreset()
+    {
+        $blockA = new \Holograph\DocumentBlock(array('name' => 'a', 'outputFile' => 'example.html'), 'foo1');
+        $blockB = new \Holograph\DocumentBlock(array('name' => 'b', 'outputFile' => 'example.html'), 'foo2');
+
+        $blocks = array($blockA, $blockB);
+
+        $pages = $this->_object->buildPages($blocks);
+
+        $expected = array(
+            'example.html' => "\nfoo1\nfoo2",
+        );
+        $this->assertEquals($expected, $pages);
+    }
+
+    public function testBuildPagesOutputFilePresetNeedsFilter()
+    {
+        $blockA = new \Holograph\DocumentBlock(array('name' => 'a', 'outputFile' => 'My Example'), 'foo1');
+        $blockB = new \Holograph\DocumentBlock(array('name' => 'b', 'outputFile' => 'My Example'), 'foo2');
+
+        $blocks = array($blockA, $blockB);
+
+        $pages = $this->_object->buildPages($blocks);
+
+        $expected = array(
+            'my_example.html' => "\nfoo1\nfoo2",
+        );
+        $this->assertEquals($expected, $pages);
+    }
+
+    public function testBuildPagesWithChildren()
+    {
+        $blockA = new \Holograph\DocumentBlock(array('name' => 'a', 'outputFile' => 'index'), 'foo1');
+        $blockB = new \Holograph\DocumentBlock(array('name' => 'b', 'parent' => 'a'), 'im a child');
+        $blockC = new \Holograph\DocumentBlock(array('name' => 'c', 'parent' => 'a'), 'im a child2');
+
+        $blockChildren = array($blockB, $blockC);
+        $blockA->children = $blockChildren;
+        $blocks = array($blockA);
+
+        $pages = $this->_object->buildPages($blocks);
+
+        $expected = array(
+            'index.html' => "\nfoo1\nim a child\nim a child2",
+        );
+        $this->assertEquals($expected, $pages);
     }
 }

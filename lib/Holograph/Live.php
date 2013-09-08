@@ -57,7 +57,8 @@ class Live
         $builder = new Builder($config, $logger);
 
         $builder->execute();
-        $destination = $builder->getConfig('destination');
+        //$destination = $builder->getConfig('destination');
+        $destination = '.';
 
         $fileio = new FileOps();
 
