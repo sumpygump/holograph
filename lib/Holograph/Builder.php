@@ -95,6 +95,13 @@ When true it will expect header.html and footer.html instead of layout.html",
     protected $_navigationItems = array();
 
     /**
+     * Flag for whether default layout is being used
+     *
+     * @var bool
+     */
+    protected $_usingDefaultLayout = false;
+
+    /**
      * Constructor
      *
      * @param array $config Configuration array
@@ -555,6 +562,7 @@ When true it will expect header.html and footer.html instead of layout.html",
         if (count($assets) == 1
             && (!file_exists($assets[0])
             || $assets[0] != $this->_config['documentation_assets'])
+            || $this->_usingDefaultLayout == true
         ) {
             $this->logger->warning(
                 sprintf(
@@ -615,6 +623,8 @@ When true it will expect header.html and footer.html instead of layout.html",
 
             $layoutFilename = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR
                 . 'default-templates' . DIRECTORY_SEPARATOR . 'layout.html';
+
+            $this->_usingDefaultLayout = true;
         }
 
         $layout = $this->fileio->readFile($layoutFilename);
