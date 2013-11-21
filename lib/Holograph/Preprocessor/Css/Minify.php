@@ -38,19 +38,16 @@ class Minify extends PreprocessorAbstract
 
         FileOps::ensurePathExists($this->getDestinationDir());
 
-        $mainStylesheet = $options['main_stylesheet'];
+        // Just get the basename of the main style sheet, this will be written 
+        // to the destination dir
+        $mainStylesheet = basename($options['main_stylesheet']);
+        $mainStylesheet = $this->getDestinationDir() . DIRECTORY_SEPARATOR . $mainStylesheet;
 
         $buffer = array();
         foreach ($cssFiles as $file) {
             $content = file_get_contents($file);
 
             $newContent = \Minify_CSS_Compressor::process($content);
-
-            $newfile = str_replace(
-                $this->getSourceDir(),
-                $this->getDestinationDir(),
-                $file
-            );
 
             $buffer[] = $newContent;
         }
