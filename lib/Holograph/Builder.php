@@ -519,7 +519,8 @@ When true it will expect header.html and footer.html instead of layout.html",
             sprintf("Writing to dest dir '%s'...", $destination)
         );
 
-        $markdownParser = new MarkdownRenderer();
+        //$markdownParser = new MarkdownRenderer();
+        $markdownParser = new ParsedownRenderer();
 
         $documentationAssets = $this->_config['documentation_assets'];
 
@@ -534,7 +535,7 @@ When true it will expect header.html and footer.html instead of layout.html",
         foreach ($this->_pages as $filename => $content) {
             $filename = $destination . DIRECTORY_SEPARATOR . $filename;
             $this->logger->info(sprintf("Writing file '%s'", $filename));
-            $htmlContent = $markdownParser->transform($content);
+            $htmlContent = $markdownParser->text($content);
 
             if ($this->_config['compat_mode']) {
                 $contents = $header . $htmlContent . $footer;

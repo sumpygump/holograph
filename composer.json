@@ -13,8 +13,8 @@
         "php": ">=5.3",
         "sumpygump/qi-console": "1.*",
         "symfony/yaml": "2.3.3",
-        "dflydev/markdown": "1.*",
-        "mrclay/minify": "2.1.*"
+        "mrclay/minify": "2.1.*",
+        "erusev/parsedown": "^1.6"
     },
     "require-dev": {
         "phpunit/phpunit": "5.3.*"
