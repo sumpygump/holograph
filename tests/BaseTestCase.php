@@ -6,11 +6,6 @@
  */
 
 /**
- * @see PHPUnit/Framework/TestCase.php
- */
-require_once 'PHPUnit/Framework/TestCase.php';
-
-/**
  * Base Test Case
  * 
  * @uses PHPUnit_Framework_TestCase
