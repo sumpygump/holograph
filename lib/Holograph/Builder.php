@@ -12,8 +12,8 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Builder
  *
- * The builder class contains the logic to read the source files, generate a 
- * mapping of output files and writing the output files to the destiantion 
+ * The builder class contains the logic to read the source files, generate a
+ * mapping of output files and writing the output files to the destiantion
  * directory.
  *
  * @package Holograph
@@ -411,7 +411,8 @@ When true it will expect header.html and footer.html instead of layout.html",
             $documentBlock->outputFile = $documentBlock->category;
 
             // Prepend the title as markdown heading
-            $documentBlock->markdown = "\n\n# " . $documentBlock->title . "\n"
+            // Using specific class with html tag to not conflict with site's h1
+            $documentBlock->markdown = "\n\n<h1 class=\"hg-hdg\">" . $documentBlock->title . "</h1>\n"
                 . $documentBlock->markdown;
 
             if (isset($this->_docBlocks[$documentBlock->name])) {
@@ -428,8 +429,8 @@ When true it will expect header.html and footer.html instead of layout.html",
             // child block
             if (isset($this->_docBlocks[$documentBlock->parent])) {
                 // Prepend the title as markdown sub-heading
-                $documentBlock->markdown = "\n\n## "
-                    . $documentBlock->title . "\n"
+                $documentBlock->markdown = "\n\n<h2 class=\"hg-hdg\"> "
+                    . $documentBlock->title . "</h2>\n"
                     . $documentBlock->markdown;
 
                 $parentBlock = $this->_docBlocks[$documentBlock->parent];
@@ -456,7 +457,12 @@ When true it will expect header.html and footer.html instead of layout.html",
      */
     public function buildPages($docBlocks, $outputFile = '')
     {
+        $this->logger->notice("Building pages ...");
+
         foreach ($docBlocks as $documentBlock) {
+            $this->logger->notice(
+                sprintf(" * Building block %s : %s", $documentBlock->category, $documentBlock->title)
+            );
             if ($documentBlock->outputFile) {
                 $pageName = $documentBlock->outputFile;
                 $outputFile = strtolower(trim($pageName));
