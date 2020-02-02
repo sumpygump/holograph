@@ -13,7 +13,7 @@ use Holograph\Logger\Terminal as TerminalLogger;
 /**
  * Client
  *
- * The client facilitates interactions from the user via a command line 
+ * The client facilitates interactions from the user via a command line
  * interface to execute functions for the holograph system.
  *
  * @uses Qi_Console_Client
@@ -61,7 +61,7 @@ class Client extends \Qi_Console_Client
 
     /**
      * Exit status code
-     * 
+     *
      * @var float
      */
     protected $_status = self::STATUS_SUCCESS;
@@ -112,8 +112,8 @@ class Client extends \Qi_Console_Client
         $configFileOverride = false;
         if ($this->_args->conf) {
             $this->_configFilename = $this->_args->conf;
-            // If a specified file fails, we want to bail since there are 
-            // destructive commands run (rm -rf) on paths that the user may not 
+            // If a specified file fails, we want to bail since there are
+            // destructive commands run (rm -rf) on paths that the user may not
             // have intended with a custom config file
             $configFileOverride = true;
         }
@@ -143,28 +143,12 @@ class Client extends \Qi_Console_Client
             }
 
             break;
-        case 'live':
+        case 'serve':
             $config = $this->readConfigFile(
                 $this->_configFilename, $configFileOverride
             );
 
-            $autoloadPath = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR;
-            if (!file_exists($autoloadPath . 'vendor/autoload.php')) {
-                $autoloadPath = dirname(dirname(dirname(dirname($autoloadPath))));
-            }
-
-            $indexContents = "<?php\n";
-            $indexContents .= sprintf("/* Holograph Live\nGenerated %s\n*/\n", date("Y-m-d H:i:s"));
-            $indexContents .= sprintf("require_once '%s/vendor/autoload.php';\n", $autoloadPath);
-            $indexContents .= "\$contents = \\Holograph\\Live::reload(\$_SERVER['REQUEST_URI']);\n";
-            $indexContents .= "print \$contents;\n";
-
-            $fileio = new FileOps();
-            $fileio->writeFile($config['destination'] . DIRECTORY_SEPARATOR . "index.php", $indexContents);
-
-            $serverCmd = 'php -S localhost:8000 -t ' . $config['destination'];
-            $this->logger->info($serverCmd);
-            passthru($serverCmd);
+            $this->initializeServer($config);
             break;
         default:
             $this->logger->warning("Unrecognized action '$action'");
@@ -240,6 +224,7 @@ class Client extends \Qi_Console_Client
         print "  init : Initialize environment for holograph (write conf file with defaults)\n";
         print "  config : Show current configuration parameters\n";
         print "  build : Build the style guide HTML/CSS\n";
+        print "  serve : Serve the styleguide in a local PHP server and rebuild every time page is refreshed\n";
         print "  help : Display program help and exit\n";
         print "\nOptions:\n";
         print "  -c <file> | --conf <file> : Use alternate configuration file\n";
@@ -253,7 +238,7 @@ class Client extends \Qi_Console_Client
 
     /**
      * Read config file
-     * 
+     *
      * @param string $configFile Path to configuration file to load
      * @param bool $throwException Whether to throw exception if file missing
      * @return array
@@ -289,5 +274,50 @@ class Client extends \Qi_Console_Client
         }
 
         return $config;
+    }
+
+    /**
+     * Initialize a simple built-in server to serve the styleguide
+     *
+     * Useful during development; not intended for production
+     *
+     * @param array $config
+     * @return void
+     */
+    public function initializeServer($config)
+    {
+        $autoloadPath = dirname(dirname(__DIR__));
+        if (!file_exists($autoloadPath . '/vendor/autoload.php')) {
+            $autoloadPath = dirname(dirname(dirname(dirname($autoloadPath))));
+        }
+
+        // Generate an index file that will be used as the server router
+        $indexContents = "<?php\n";
+        $indexContents .= sprintf("/*\nHolograph Live\nGenerated %s\n*/\n", date("Y-m-d H:i:s"));
+
+        // Here will be a simple router for static files
+        $indexContents .= "if (preg_match('/\.(?:css|js|png|jpg|jpeg|gif)$/', \$_SERVER[\"REQUEST_URI\"])) {\n";
+        $indexContents .= "   return false; // serve the requested resource as-is.\n";
+        $indexContents .= "}\n";
+
+        // Everything else will trigger a re-build
+        $indexContents .= sprintf("require_once \"%s/vendor/autoload.php\";\n", $autoloadPath);
+
+        // Make sure the current working directory is the same as where holograph is invoked
+        $indexContents .= sprintf("chdir(\"%s\");\n", getcwd());
+
+        $indexContents .= "\$contents = \\Holograph\\Live::reload(\$_SERVER['REQUEST_URI']);\n";
+        $indexContents .= "print \$contents;\n";
+
+        $fileio = new FileOps();
+        $fileio->writeFile($config['destination'] . DIRECTORY_SEPARATOR . "index.php", $indexContents);
+
+        $port = isset($config["port"]) ? $config["port"] : "3232";
+        print "Starting server on port $port\n";
+
+        // Command to run a simple built-in server. Set the project directory and the router script
+        $serverCmd = sprintf("php -S 0.0.0.0:%s -t %s %s/index.php", $port, $config['destination'], $config['destination']);
+        $this->logger->info($serverCmd);
+        passthru($serverCmd);
     }
 }

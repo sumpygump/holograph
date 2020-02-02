@@ -100,7 +100,7 @@ class ParsedownRenderer extends Parsedown
 
     /**
      * blockFencedCodeComplete
-     * 
+     *
      * Gets called when the fenced code block is completed during parsing
      *
      * @param array $Block Definition of data for this block

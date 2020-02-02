@@ -10,12 +10,12 @@ namespace Holograph;
 /**
  * DocumentBlock
  *
- * A document block represents a comment block from a CSS file that should be 
- * included in the style guide. A document block will contain some YML front 
+ * A document block represents a comment block from a CSS file that should be
+ * included in the style guide. A document block will contain some YML front
  * matter with settings and some markdown documentation.
  *
- * By convention, any code fenced blocks containing the word 'example' (e.g. 
- * ```html_example ...  ```) will be treated in such a way to include the 
+ * By convention, any code fenced blocks containing the word 'example' (e.g.
+ * ```html_example ...  ```) will be treated in such a way to include the
  * example itself followed by the code block. See Holograph\MarkdownRenderer.
  *
  * @package Holograph
