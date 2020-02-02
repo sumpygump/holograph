@@ -51,6 +51,7 @@ class Builder
         'preprocessor'         => "minify",
         'build'                => "./build/css",
         'main_stylesheet'      => "build/css/screen.css",
+        'port'                 => "3232",
     );
 
     // @codingStandardsIgnoreStart
@@ -70,6 +71,7 @@ When true it will expect header.html and footer.html instead of layout.html",
         'preprocessor'         => "Build option to actually compiles CSS files (options: none, minify)",
         'build'                => "Directory to build the final CSS files",
         'main_stylesheet'      => "The main stylesheet to be included {{main_stylesheet}}",
+        'port'                 => "Http port to use when running with `holograph serve`",
     );
     // @codingStandardsIgnoreEnd
 
