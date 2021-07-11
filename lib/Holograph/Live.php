@@ -72,7 +72,7 @@ class Live
 
     /**
      * transformRequestUri
-     * 
+     *
      * Maybe this isn't needed anymore?
      *
      * @param string $requestUri

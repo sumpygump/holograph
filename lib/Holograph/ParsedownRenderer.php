@@ -64,7 +64,7 @@ class ParsedownRenderer extends Parsedown
     protected function createRegularBlockFencedCode($line, $isExample, $language = '', $lineNumber = '')
     {
         $char = $line['text'][0];
-        $classes = array('prettyprint');
+        $classes = ['prettyprint'];
 
         if ($language) {
             $classes[] = 'language-' . $language;
@@ -74,26 +74,26 @@ class ParsedownRenderer extends Parsedown
             $classes[] = 'linenums:' . $lineNumber;
         }
 
-        $element = array(
+        $element = [
             'name' => 'pre',
             'text' => '',
-            'attributes' => array(
+            'attributes' => [
                 'class' => implode(' ', $classes),
-            ),
-        );
+            ],
+        ];
 
-        $block = array(
+        $block = [
             'char' => $char,
             'isExample' => $isExample,
-            'element' => array(
+            'element' => [
                 'name' => 'div',
                 'handler' => 'element',
                 'text' => $element,
-                'attributes' => array(
+                'attributes' => [
                     'class' => 'codeBlock',
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
 
         return $block;
     }
@@ -109,29 +109,27 @@ class ParsedownRenderer extends Parsedown
     protected function blockFencedCodeComplete($Block)
     {
         $text = $Block['element']['text']['text'];
-        $sanitizedText = htmlspecialchars($text, ENT_NOQUOTES, 'UTF-8');
-        $Block['element']['text']['text'] = $sanitizedText;
 
         if ($Block['isExample'] == false) {
             return $Block;
         }
 
-        $exampleOutputDiv = array(
+        $exampleOutputDiv = [
             'name' => 'div',
-            'text' => $text,
-            'attributes' => array(
+            'rawHtml' => $text,
+            'attributes' => [
                 'class' => 'exampleOutput',
-            ),
-        );
+            ],
+        ];
 
-        $wrapDiv = array(
+        $wrapDiv = [
             'name' => 'div',
-            'attributes' => array(
+            'attributes' => [
                 'class' => 'codeExample',
-            ),
+            ],
             'handler' => 'elements',
-            'text' => array($exampleOutputDiv, $Block['element']),
-        );
+            'text' => [$exampleOutputDiv, $Block['element']],
+        ];
 
         $Block['element'] = $wrapDiv;
         return $Block;

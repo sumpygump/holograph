@@ -27,7 +27,7 @@ class ClientTest extends BaseTestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         //$this->logger = new Memory();
 
@@ -37,11 +37,11 @@ class ClientTest extends BaseTestCase
     /**
      * testConstruct
      *
-     * @expectedException PHPUnit_Framework_Error
      * @return void
      */
     public function testConstruct()
     {
+        $this->expectException(\ArgumentCountError::class);
         $client = new \Holograph\Client();
     }
 }

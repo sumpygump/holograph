@@ -112,7 +112,6 @@ class DocumentBlock
         if (!$this->title) {
             $this->title = ucfirst($this->name);
         }
-
         $this->markdown = $markdown;
     }
 }
