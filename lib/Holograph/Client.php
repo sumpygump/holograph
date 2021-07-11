@@ -296,7 +296,7 @@ class Client extends \Qi_Console_Client
         $indexContents .= sprintf("/*\nHolograph Live\nGenerated %s\n*/\n", date("Y-m-d H:i:s"));
 
         // Here will be a simple router for static files
-        $indexContents .= "if (preg_match('/\.(?:css|js|png|jpg|jpeg|gif)$/', \$_SERVER[\"REQUEST_URI\"])) {\n";
+        $indexContents .= "if (preg_match('/\.(?:css|js|png|jpg|jpeg|gif)(?:\?.*)?$/', \$_SERVER[\"REQUEST_URI\"])) {\n";
         $indexContents .= "   return false; // serve the requested resource as-is.\n";
         $indexContents .= "}\n";
 
