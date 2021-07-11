@@ -267,7 +267,7 @@ class Client extends \Qi_Console_Client
 
         $this->logger->info(sprintf("Using config file '%s'", $configFile));
 
-        $config = Yaml::parse($configFile);
+        $config = Yaml::parseFile($configFile);
 
         if ($config == $configFile) {
             return array();

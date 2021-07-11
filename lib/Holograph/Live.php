@@ -51,7 +51,7 @@ class Live
     {
         $configFile = 'holograph.yml';
 
-        $config = Yaml::parse($configFile);
+        $config = Yaml::parseFile($configFile);
 
         $logger = new Logger\Stdout();
         $builder = new Builder($config, $logger);
