@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Base Test Case
- * 
+ *
  * @uses TestCase
  * @package Holograph
  * @subpackage Tests

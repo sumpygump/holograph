@@ -100,7 +100,9 @@ class BuilderTest extends BaseTestCase
         $terminal = $this->getMock("Qi_Console_Terminal");
 
         $logger = $this->getMock(
-            "Holograph\\Logger\\Terminal", array(), array($terminal)
+            "Holograph\\Logger\\Terminal",
+            array(),
+            array($terminal)
         );
 
         $logger->expects($this->once())
@@ -277,7 +279,8 @@ class BuilderTest extends BaseTestCase
     {
         mkdir("test-source");
         file_put_contents(
-            "test-source/test.css", "/*doc\n---\nfoobar\n---\n*/"
+            "test-source/test.css",
+            "/*doc\n---\nfoobar\n---\n*/"
         );
 
         $config = array(

@@ -265,13 +265,13 @@ When true it will expect header.html and footer.html instead of layout.html",
         foreach ($files as $file) {
             $extension = pathinfo($file, PATHINFO_EXTENSION);
 
-            switch($extension) {
-            case 'md':
-                $this->parseSourceDocFile($file);
-                break;
-            case 'css':
-                $this->parseSourceStylesheetFile($file);
-                break;
+            switch ($extension) {
+                case 'md':
+                    $this->parseSourceDocFile($file);
+                    break;
+                case 'css':
+                    $this->parseSourceStylesheetFile($file);
+                    break;
             }
         }
     }
@@ -310,7 +310,9 @@ When true it will expect header.html and footer.html instead of layout.html",
 
         // Find all the desired commment blocks (/*doc ... */)
         $commentBlockCount = preg_match_all(
-            "#^\s*/\*doc(.*?)\*/#ms", $contents, $matches
+            "#^\s*/\*doc(.*?)\*/#ms",
+            $contents,
+            $matches
         );
 
         if (!$commentBlockCount) {
@@ -344,7 +346,8 @@ When true it will expect header.html and footer.html instead of layout.html",
 
         $this->logger->notice(
             sprintf(
-                "Running preprocessor '%s'...", $this->_config['preprocessor']
+                "Running preprocessor '%s'...",
+                $this->_config['preprocessor']
             )
         );
 
@@ -648,7 +651,9 @@ When true it will expect header.html and footer.html instead of layout.html",
         $navigation = "";
         foreach ($this->_navigationItems as $filename => $pageName) {
             $navigation .= sprintf(
-                '<li><a href="%s">%s</a></li>', $filename, $pageName
+                '<li><a href="%s">%s</a></li>',
+                $filename,
+                $pageName
             ) . "\n";
         }
         $layout = str_replace("{{navigation}}", $navigation, $layout);

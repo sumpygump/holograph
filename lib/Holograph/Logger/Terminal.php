@@ -144,9 +144,11 @@ class Terminal implements LoggerInterface
      * @param int $color Color to use
      * @return void
      */
-    protected function _displayMessage($message, $ensureNewline = true,
-        $color = 2)
-    {
+    protected function _displayMessage(
+        $message,
+        $ensureNewline = true,
+        $color = 2
+    ) {
         if ($ensureNewline && substr($message, -1) != "\n") {
             $message .= "\n";
         }

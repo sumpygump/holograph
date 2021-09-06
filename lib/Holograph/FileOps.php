@@ -52,7 +52,7 @@ class FileOps
 
     /**
      * Recursive Glob
-     * 
+     *
      * @param string $pattern Pattern
      * @param int $flags Flags to pass to glob
      * @param string $path Path to glob in
@@ -74,7 +74,8 @@ class FileOps
             }
             return self::rglob(
                 basename($pattern),
-                $flags, $dir . DIRECTORY_SEPARATOR
+                $flags,
+                $dir . DIRECTORY_SEPARATOR
             );
         }
 
@@ -83,7 +84,8 @@ class FileOps
 
         foreach ($paths as $p) {
             $files = array_merge(
-                $files, self::rglob($pattern, $flags, $p . DIRECTORY_SEPARATOR)
+                $files,
+                self::rglob($pattern, $flags, $p . DIRECTORY_SEPARATOR)
             );
         }
 

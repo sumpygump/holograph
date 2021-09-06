@@ -22,7 +22,7 @@ class Minify extends PreprocessorAbstract
     /**
      * Execute preprocessor
      *
-     * This will take all CSS files from the source dir, minify each one and 
+     * This will take all CSS files from the source dir, minify each one and
      * then combine them into one file.
      *
      * @param array $options Options for execution
@@ -38,7 +38,7 @@ class Minify extends PreprocessorAbstract
 
         FileOps::ensurePathExists($this->getDestinationDir());
 
-        // Just get the basename of the main style sheet, this will be written 
+        // Just get the basename of the main style sheet, this will be written
         // to the destination dir
         $mainStylesheet = basename($options['main_stylesheet']);
         $mainStylesheet = $this->getDestinationDir() . DIRECTORY_SEPARATOR . $mainStylesheet;

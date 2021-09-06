@@ -119,41 +119,43 @@ class Client extends \Qi_Console_Client
         }
 
         switch ($action) {
-        case 'init':
-            $this->logger->notice("Initializing environment for Holograph");
-            $this->writeConfig();
-            break;
-        case 'config':
-            $this->showConfig();
-            break;
-        case 'build':
-            $config = $this->readConfigFile(
-                $this->_configFilename, $configFileOverride
-            );
+            case 'init':
+                $this->logger->notice("Initializing environment for Holograph");
+                $this->writeConfig();
+                break;
+            case 'config':
+                $this->showConfig();
+                break;
+            case 'build':
+                $config = $this->readConfigFile(
+                    $this->_configFilename,
+                    $configFileOverride
+                );
 
-            if ($this->_args->compat) {
-                $config['compatMode'] = $this->_args->compat;
-            }
-            $builder = new Builder($config, $this->logger);
+                if ($this->_args->compat) {
+                    $config['compatMode'] = $this->_args->compat;
+                }
+                $builder = new Builder($config, $this->logger);
 
-            try {
-                $builder->execute();
-            } catch (\Exception $exception) {
-                $this->_halt($exception->getMessage());
-            }
+                try {
+                    $builder->execute();
+                } catch (\Exception $exception) {
+                    $this->_halt($exception->getMessage());
+                }
 
-            break;
-        case 'serve':
-            $config = $this->readConfigFile(
-                $this->_configFilename, $configFileOverride
-            );
+                break;
+            case 'serve':
+                $config = $this->readConfigFile(
+                    $this->_configFilename,
+                    $configFileOverride
+                );
 
-            $this->initializeServer($config);
-            break;
-        default:
-            $this->logger->warning("Unrecognized action '$action'");
-            $this->_status = self::STATUS_ERROR;
-            break;
+                $this->initializeServer($config);
+                break;
+            default:
+                $this->logger->warning("Unrecognized action '$action'");
+                $this->_status = self::STATUS_ERROR;
+                break;
         }
 
         return $this->_status;
@@ -250,7 +252,8 @@ class Client extends \Qi_Console_Client
                 throw new \Exception(
                     sprintf(
                         "Config file '%s' not found. (Path: %s)",
-                        $configFile, getcwd()
+                        $configFile,
+                        getcwd()
                     )
                 );
             }
@@ -259,7 +262,8 @@ class Client extends \Qi_Console_Client
                 sprintf(
                     "Config file '%s' not found. "
                     . "Using default configuration. (Path: %s)",
-                    $configFile, getcwd()
+                    $configFile,
+                    getcwd()
                 )
             );
             return array();
