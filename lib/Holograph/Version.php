@@ -22,7 +22,7 @@ class Version
     /**
      * Current version
      */
-    const VERSION = '0.9';
+    public const VERSION = '0.9';
 
     /**
      * Render version

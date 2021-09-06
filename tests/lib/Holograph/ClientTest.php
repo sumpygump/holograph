@@ -2,20 +2,27 @@
 
 namespace Holograph\Test;
 
-use BaseTestCase;
-use Holograph\Builder;
+use Holograph\Client;
 use Holograph\Logger\Memory;
+use PHPUnit\Framework\TestCase;
+use Qi_Console_ArgV;
+use Qi_Console_Terminal;
 
 /**
  * ClientTest
  *
- * @uses BaseTestCase
  * @package Holograph
  * @author Jansen Price <jansen.price@gmail.com>
- * @version $Id$
  */
-class ClientTest extends BaseTestCase
+class ClientTest extends TestCase
 {
+    /**
+     * Object under test
+     *
+     * @var mixed
+     */
+    public $object;
+
     /**
      * Logging object
      *
@@ -30,9 +37,11 @@ class ClientTest extends BaseTestCase
      */
     public function setUp(): void
     {
-        //$this->logger = new Memory();
+        $this->logger = new Memory();
+        $argv = new Qi_Console_ArgV([]);
+        $terminal = new Qi_Console_Terminal();
 
-        //$this->_object = new Builder(array(), $this->logger);
+        $this->object = new Client($argv, $terminal);
     }
 
     /**

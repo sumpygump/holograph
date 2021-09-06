@@ -43,17 +43,17 @@ class Client extends \Qi_Console_Client
      *
      * @var int
      */
-    const NOTIFY_WARNING = 0;
-    const NOTIFY_MESSAGE = 1;
-    const NOTIFY_VERBOSE = 2;
+    public const NOTIFY_WARNING = 0;
+    public const NOTIFY_MESSAGE = 1;
+    public const NOTIFY_VERBOSE = 2;
 
     /**
      * Exit status constants
      *
      * @var int
      */
-    const STATUS_SUCCESS = 0;
-    const STATUS_ERROR   = 1;
+    public const STATUS_SUCCESS = 0;
+    public const STATUS_ERROR   = 1;
 
     /**
      * @var Holograph\Logger\Terminal
@@ -65,14 +65,14 @@ class Client extends \Qi_Console_Client
      *
      * @var float
      */
-    protected $_status = self::STATUS_SUCCESS;
+    protected $status = self::STATUS_SUCCESS;
 
     /**
      * Default configuration filename
      *
      * @var string
      */
-    protected $_configFilename = 'holograph.yml';
+    protected $configFilename = 'holograph.yml';
 
     /**
      * init
@@ -112,7 +112,7 @@ class Client extends \Qi_Console_Client
 
         $configFileOverride = false;
         if ($this->_args->conf) {
-            $this->_configFilename = $this->_args->conf;
+            $this->configFilename = $this->_args->conf;
             // If a specified file fails, we want to bail since there are
             // destructive commands run (rm -rf) on paths that the user may not
             // have intended with a custom config file
@@ -129,7 +129,7 @@ class Client extends \Qi_Console_Client
                 break;
             case 'build':
                 $config = $this->readConfigFile(
-                    $this->_configFilename,
+                    $this->configFilename,
                     $configFileOverride
                 );
 
@@ -147,7 +147,7 @@ class Client extends \Qi_Console_Client
                 break;
             case 'serve':
                 $config = $this->readConfigFile(
-                    $this->_configFilename,
+                    $this->configFilename,
                     $configFileOverride
                 );
 
@@ -155,11 +155,11 @@ class Client extends \Qi_Console_Client
                 break;
             default:
                 $this->logger->warning("Unrecognized action '$action'");
-                $this->_status = self::STATUS_ERROR;
+                $this->status = self::STATUS_ERROR;
                 break;
         }
 
-        return $this->_status;
+        return $this->status;
     }
 
     /**
@@ -169,11 +169,11 @@ class Client extends \Qi_Console_Client
      */
     public function writeConfig()
     {
-        if (file_exists($this->_configFilename)) {
+        if (file_exists($this->configFilename)) {
             $this->_halt(
                 sprintf(
                     "Config file already exists: '%s'",
-                    $this->_configFilename
+                    $this->configFilename
                 )
             );
         }
@@ -183,12 +183,12 @@ class Client extends \Qi_Console_Client
         $this->logger->notice(
             sprintf(
                 "Writing default configuration to config file '%s'",
-                $this->_configFilename
+                $this->configFilename
             )
         );
 
         file_put_contents(
-            $this->_configFilename,
+            $this->configFilename,
             $defaultBuilder->getConfigAnnotated()
         );
     }
@@ -200,12 +200,12 @@ class Client extends \Qi_Console_Client
      */
     public function showConfig()
     {
-        $config = $this->readConfigFile($this->_configFilename);
+        $config = $this->readConfigFile($this->configFilename);
 
         $this->logger->notice(
             sprintf(
                 "Current config: (%s)\n---------------\n%s",
-                $this->_configFilename,
+                $this->configFilename,
                 Yaml::dump($config)
             )
         );
@@ -298,10 +298,15 @@ class Client extends \Qi_Console_Client
 
         // Generate an index file that will be used as the server router
         $indexContents = "<?php\n";
-        $indexContents .= sprintf("/*\nHolograph Live\nGenerated %s\n*/\n", date("Y-m-d H:i:s"));
+        $indexContents .= sprintf(
+            "/*\nHolograph Live\nGenerated %s\n*/\n",
+            date("Y-m-d H:i:s")
+        );
 
         // Here will be a simple router for static files
-        $indexContents .= "if (preg_match('/\.(?:css|js|png|jpg|jpeg|gif)(?:\?.*)?$/', \$_SERVER[\"REQUEST_URI\"])) {\n";
+        $indexContents .= "if (preg_match(";
+        $indexContents .= "'/\.(?:css|js|png|jpg|jpeg|gif)(?:\?.*)?$/',";
+        $indexContents .= " \$_SERVER[\"REQUEST_URI\"])) {\n";
         $indexContents .= "   return false; // serve the requested resource as-is.\n";
         $indexContents .= "}\n";
 
@@ -315,13 +320,22 @@ class Client extends \Qi_Console_Client
         $indexContents .= "print \$contents;\n";
 
         $fileio = new FileOps();
-        $fileio->writeFile($config['destination'] . DIRECTORY_SEPARATOR . "index.php", $indexContents);
+        $fileio->writeFile(
+            $config['destination'] . DIRECTORY_SEPARATOR . "index.php",
+            $indexContents
+        );
 
         $port = isset($config["port"]) ? $config["port"] : "3232";
         print "Starting server on port $port\n";
 
-        // Command to run a simple built-in server. Set the project directory and the router script
-        $serverCmd = sprintf("php -S 0.0.0.0:%s -t %s %s/index.php", $port, $config['destination'], $config['destination']);
+        // Command to run a simple built-in server. Set the project directory
+        // and the router script
+        $serverCmd = sprintf(
+            "php -S 0.0.0.0:%s -t %s %s/index.php",
+            $port,
+            $config['destination'],
+            $config['destination']
+        );
         $this->logger->info($serverCmd);
         passthru($serverCmd);
     }

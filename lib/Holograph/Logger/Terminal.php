@@ -23,21 +23,21 @@ class Terminal implements LoggerInterface
      *
      * @var Qi_Console_Terminal
      */
-    protected $_terminal;
+    protected $terminal;
 
     /**
      * Quiet mode
      *
      * @var bool
      */
-    protected $_quiet = false;
+    protected $quiet = false;
 
     /**
      * Verbose mode
      *
      * @var bool
      */
-    protected $_verbose = false;
+    protected $verbose = false;
 
     /**
      * Constructor
@@ -47,7 +47,7 @@ class Terminal implements LoggerInterface
      */
     public function __construct($terminal)
     {
-        $this->_terminal = $terminal;
+        $this->terminal = $terminal;
     }
 
     /**
@@ -68,7 +68,7 @@ class Terminal implements LoggerInterface
      */
     public function warning($message)
     {
-        $this->_displayWarning($message);
+        $this->displayWarning($message);
     }
 
     /**
@@ -79,11 +79,11 @@ class Terminal implements LoggerInterface
      */
     public function notice($message)
     {
-        if ($this->_quiet) {
+        if ($this->quiet) {
             return false;
         }
 
-        $this->_displayMessage($message, true, 7);
+        $this->displayMessage($message, true, 7);
     }
 
     /**
@@ -94,11 +94,11 @@ class Terminal implements LoggerInterface
      */
     public function info($message)
     {
-        if ($this->_quiet || !$this->_verbose) {
+        if ($this->quiet || !$this->verbose) {
             return false;
         }
 
-        $this->_displayMessage(">> " . $message, true, 4);
+        $this->displayMessage(">> " . $message, true, 4);
     }
 
     /**
@@ -109,7 +109,7 @@ class Terminal implements LoggerInterface
      */
     public function setQuiet($value)
     {
-        $this->_quiet = (bool) $value;
+        $this->quiet = (bool) $value;
         return $this;
     }
 
@@ -121,7 +121,7 @@ class Terminal implements LoggerInterface
      */
     public function setVerbose($value)
     {
-        $this->_verbose = (bool) $value;
+        $this->verbose = (bool) $value;
         return $this;
     }
 
@@ -132,9 +132,9 @@ class Terminal implements LoggerInterface
      * @param bool $ensureNewline Whether a new line should be appended
      * @return void
      */
-    protected function _displayWarning($message, $ensureNewline = true)
+    protected function displayWarning($message, $ensureNewline = true)
     {
-        $this->_displayMessage($message, $ensureNewline, 3); //yellow
+        $this->displayMessage($message, $ensureNewline, 3); //yellow
     }
 
     /**
@@ -145,7 +145,7 @@ class Terminal implements LoggerInterface
      * @param int $color Color to use
      * @return void
      */
-    protected function _displayMessage(
+    protected function displayMessage(
         $message,
         $ensureNewline = true,
         $color = 2
@@ -154,9 +154,9 @@ class Terminal implements LoggerInterface
             $message .= "\n";
         }
 
-        $this->_terminal->setaf($color);
+        $this->terminal->setaf($color);
         echo $message;
-        $this->_terminal->op();
+        $this->terminal->op();
     }
 
     /**
@@ -165,10 +165,10 @@ class Terminal implements LoggerInterface
      * @param string $message Error message
      * @return void
      */
-    protected function _displayError($message)
+    protected function displayError($message)
     {
         echo "\n";
-        $this->_terminal->pretty_message($message, 7, 1);
+        $this->terminal->pretty_message($message, 7, 1);
         echo "\n";
     }
 }

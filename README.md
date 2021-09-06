@@ -92,7 +92,7 @@ and some markdown as documented below.
     <strong class="badgeSecondary">For Rent</strong>
     ```
     */
-    
+
     .badgeStandard {
       background-color: #999999;
     }
@@ -204,7 +204,7 @@ Example:
         <button class="btn">Click</button>
     </div>
     ```
-    
+
 ## Markdown Files
 
 You can also place Markdown files in the source directory. These files will be
@@ -356,17 +356,17 @@ engines such as Sass or Less.
 The following settings in the config file are used by the preprocessor:
 
     preprocessor: minify
-    
+
 The "preprocessor" key provides a directive of which minify option to use. Currently
 the options are "minify" or "none".
 
     build: ./build/css
-    
+
 The "build" key defines a directory where the final optimized CSS file should be
 written.
 
     main_stylesheet: build/css/screen.css
-    
+
 The "main_stylesheet" is the file path and name the preprocessor uses as the
 final output file for the optimized stylesheet. This value is also used to
 include the destination stylesheet in the styleguide build output.

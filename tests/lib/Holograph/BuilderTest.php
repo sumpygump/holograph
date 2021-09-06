@@ -8,20 +8,25 @@
 
 namespace Holograph\Test;
 
-use BaseTestCase;
 use Holograph\Builder;
 use Holograph\Logger\Memory;
+use PHPUnit\Framework\TestCase;
 
 /**
  * BuilderTest
  *
- * @uses BaseTestCase
  * @package Holograph
  * @author Jansen Price <jansen.price@gmail.com>
- * @version $Id$
  */
-class BuilderTest extends BaseTestCase
+class BuilderTest extends TestCase
 {
+    /**
+     * Object under test
+     *
+     * @var mixed
+     */
+    public $object;
+
     /**
      * Logging object
      *
@@ -38,7 +43,7 @@ class BuilderTest extends BaseTestCase
     {
         $this->logger = new Memory();
 
-        $this->_object = new Builder(array(), $this->logger);
+        $this->object = new Builder(array(), $this->logger);
     }
 
     /**
@@ -120,7 +125,7 @@ class BuilderTest extends BaseTestCase
      */
     public function testGetConfig()
     {
-        $config = $this->_object->getConfig();
+        $config = $this->object->getConfig();
 
         $expected = array(
             'title'                => "Style Guide",
@@ -201,7 +206,7 @@ class BuilderTest extends BaseTestCase
      */
     public function testGetConfigAnnotated()
     {
-        $doc = $this->_object->getConfigAnnotated();
+        $doc = $this->object->getConfigAnnotated();
 
         $this->assertStringContainsString("Holograph configuration", $doc);
         $this->assertStringContainsString("Directory to build the final", $doc);
@@ -214,7 +219,7 @@ class BuilderTest extends BaseTestCase
      */
     public function testExecute()
     {
-        $result = $this->_object->execute();
+        $result = $this->object->execute();
 
         $this->assertEquals(1, $result);
     }
@@ -322,7 +327,7 @@ class BuilderTest extends BaseTestCase
      */
     public function testCreateDocumentBlockNoMatch()
     {
-        $result = $this->_object->createDocumentBlock('abc', 'def');
+        $result = $this->object->createDocumentBlock('abc', 'def');
         $this->assertFalse($result);
     }
 
@@ -335,7 +340,7 @@ class BuilderTest extends BaseTestCase
     {
         $block = "---\nname: foobar\n---";
 
-        $result = $this->_object->createDocumentBlock($block, 'def');
+        $result = $this->object->createDocumentBlock($block, 'def');
 
         $this->assertEquals("Holograph\\DocumentBlock", get_class($result));
     }
@@ -349,7 +354,7 @@ class BuilderTest extends BaseTestCase
     {
         $block = "---\nhi\n---";
 
-        $result = $this->_object->createDocumentBlock($block, 'def');
+        $result = $this->object->createDocumentBlock($block, 'def');
 
         $this->assertEquals("Holograph\\DocumentBlock", get_class($result));
     }
@@ -363,9 +368,9 @@ class BuilderTest extends BaseTestCase
     {
         $documentBlock = new \Holograph\DocumentBlock(array('name' => 'b'), 'foo.txt');
 
-        $this->_object->addDocumentBlock($documentBlock);
+        $this->object->addDocumentBlock($documentBlock);
 
-        $blocks = $this->_object->getDocBlocks();
+        $blocks = $this->object->getDocBlocks();
 
         $block = array_pop($blocks);
 
@@ -382,10 +387,10 @@ class BuilderTest extends BaseTestCase
         $documentBlock = new \Holograph\DocumentBlock(array('name' => 'b'), 'foo1.txt');
         $documentBlock2 = new \Holograph\DocumentBlock(array('name' => 'b'), 'foo1.txt');
 
-        $this->_object->addDocumentBlock($documentBlock);
-        $this->_object->addDocumentBlock($documentBlock2);
+        $this->object->addDocumentBlock($documentBlock);
+        $this->object->addDocumentBlock($documentBlock2);
 
-        $blocks = $this->_object->getDocBlocks();
+        $blocks = $this->object->getDocBlocks();
 
         $block = array_pop($blocks);
 
@@ -407,10 +412,10 @@ class BuilderTest extends BaseTestCase
         $documentBlock = new \Holograph\DocumentBlock(array('name' => 'a'), 'foo1.txt');
         $documentBlock2 = new \Holograph\DocumentBlock(array('name' => 'b', 'parent' => 'a'), 'foo1.txt');
 
-        $this->_object->addDocumentBlock($documentBlock);
-        $this->_object->addDocumentBlock($documentBlock2);
+        $this->object->addDocumentBlock($documentBlock);
+        $this->object->addDocumentBlock($documentBlock2);
 
-        $blocks = $this->_object->getDocBlocks();
+        $blocks = $this->object->getDocBlocks();
 
         $blockParent = array_pop($blocks);
 
@@ -428,10 +433,10 @@ class BuilderTest extends BaseTestCase
         $documentBlock = new \Holograph\DocumentBlock(array('name' => 'a'), 'foo1.txt');
         $documentBlock2 = new \Holograph\DocumentBlock(array('name' => 'b', 'parent' => 'x'), 'foo1.txt');
 
-        $this->_object->addDocumentBlock($documentBlock);
-        $this->_object->addDocumentBlock($documentBlock2);
+        $this->object->addDocumentBlock($documentBlock);
+        $this->object->addDocumentBlock($documentBlock2);
 
-        $blocks = $this->_object->getDocBlocks();
+        $blocks = $this->object->getDocBlocks();
 
         $blockParent = array_pop($blocks);
 
@@ -445,7 +450,7 @@ class BuilderTest extends BaseTestCase
 
         $blocks = array($block);
 
-        $pages = $this->_object->buildPages($blocks);
+        $pages = $this->object->buildPages($blocks);
 
         $expected = array(
             'index.html' => "\nfoo1.txt",
@@ -460,7 +465,7 @@ class BuilderTest extends BaseTestCase
 
         $blocks = array($blockA, $blockB);
 
-        $pages = $this->_object->buildPages($blocks);
+        $pages = $this->object->buildPages($blocks);
 
         $expected = array(
             'index.html' => "\nfoo1\nfoo2",
@@ -475,7 +480,7 @@ class BuilderTest extends BaseTestCase
 
         $blocks = array($blockA, $blockB);
 
-        $pages = $this->_object->buildPages($blocks);
+        $pages = $this->object->buildPages($blocks);
 
         $expected = array(
             'example.html' => "\nfoo1\nfoo2",
@@ -490,7 +495,7 @@ class BuilderTest extends BaseTestCase
 
         $blocks = array($blockA, $blockB);
 
-        $pages = $this->_object->buildPages($blocks);
+        $pages = $this->object->buildPages($blocks);
 
         $expected = array(
             'my_example.html' => "\nfoo1\nfoo2",
@@ -508,7 +513,7 @@ class BuilderTest extends BaseTestCase
         $blockA->children = $blockChildren;
         $blocks = array($blockA);
 
-        $pages = $this->_object->buildPages($blocks);
+        $pages = $this->object->buildPages($blocks);
 
         $expected = array(
             'index.html' => "\nfoo1\nim a child\nim a child2",

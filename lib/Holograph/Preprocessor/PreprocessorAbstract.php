@@ -22,14 +22,14 @@ abstract class PreprocessorAbstract
      *
      * @var string
      */
-    protected $_sourceDir = '';
+    protected $sourceDir = '';
 
     /**
      * Destination directory
      *
      * @var string
      */
-    protected $_destinationDir = '';
+    protected $destinationDir = '';
 
     /**
      * Set source directory
@@ -39,7 +39,7 @@ abstract class PreprocessorAbstract
      */
     public function setSourceDir($source)
     {
-        $this->_sourceDir = $source;
+        $this->sourceDir = $source;
         return $this;
     }
 
@@ -50,7 +50,7 @@ abstract class PreprocessorAbstract
      */
     public function getSourceDir()
     {
-        return $this->_sourceDir;
+        return $this->sourceDir;
     }
 
     /**
@@ -61,7 +61,7 @@ abstract class PreprocessorAbstract
      */
     public function setDestinationDir($destination)
     {
-        $this->_destinationDir = $destination;
+        $this->destinationDir = $destination;
         return $this;
     }
 
@@ -72,7 +72,7 @@ abstract class PreprocessorAbstract
      */
     public function getDestinationDir()
     {
-        return $this->_destinationDir;
+        return $this->destinationDir;
     }
 
     /**

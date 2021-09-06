@@ -22,7 +22,7 @@ class Memory implements LoggerInterface
      *
      * @var array
      */
-    protected $_messages = array(
+    protected $messages = array(
         'error'   => array(),
         'warning' => array(),
         'notice'  => array(),
@@ -37,7 +37,7 @@ class Memory implements LoggerInterface
      */
     public function error($message)
     {
-        $this->_messages['error'][] = $message;
+        $this->messages['error'][] = $message;
     }
 
     /**
@@ -48,7 +48,7 @@ class Memory implements LoggerInterface
      */
     public function warning($message)
     {
-        $this->_messages['warning'][] = $message;
+        $this->messages['warning'][] = $message;
     }
 
     /**
@@ -59,7 +59,7 @@ class Memory implements LoggerInterface
      */
     public function notice($message)
     {
-        $this->_messages['notice'][] = $message;
+        $this->messages['notice'][] = $message;
     }
 
     /**
@@ -70,7 +70,7 @@ class Memory implements LoggerInterface
      */
     public function info($message)
     {
-        $this->_messages['info'][] = $message;
+        $this->messages['info'][] = $message;
     }
 
     /**
@@ -80,6 +80,6 @@ class Memory implements LoggerInterface
      */
     public function getMessages()
     {
-        return $this->_messages;
+        return $this->messages;
     }
 }
