@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Minify CSS Preprocessor class file
  *

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Holograph logger interface file
  *

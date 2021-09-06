@@ -34,7 +34,7 @@ class ParsedownRenderer extends Parsedown
         // ```html,21
         // The comma and then a number will set the line numbers for the pretty
         // print display
-        if (preg_match('/^['.$char.']{3,}[ ]*([\w-]+)?(?:,[ ]?(\d+))?[ ]*$/', $Line['text'], $matches)) {
+        if (preg_match('/^[' . $char . ']{3,}[ ]*([\w-]+)?(?:,[ ]?(\d+))?[ ]*$/', $Line['text'], $matches)) {
             $language = isset($matches[1]) ? $matches[1] : '';
             $lineNumber = isset($matches[2]) ? $matches[2] : '';
 

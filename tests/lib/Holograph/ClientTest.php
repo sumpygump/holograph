@@ -1,7 +1,8 @@
 <?php
+
 namespace Holograph\Test;
 
-use \BaseTestCase;
+use BaseTestCase;
 use Holograph\Builder;
 use Holograph\Logger\Memory;
 

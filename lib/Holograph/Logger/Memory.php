@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Memory logger class file
  *

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Terminal Logger
  *

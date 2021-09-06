@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Holograph CLI client
  *

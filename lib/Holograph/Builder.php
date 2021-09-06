@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Holograph builder file
  *
@@ -571,7 +572,8 @@ When true it will expect header.html and footer.html instead of layout.html",
 
         // When there are no custom template files to use, let's include
         // holograph's default template dir.
-        if (count($assets) == 1
+        if (
+            count($assets) == 1
             && (!file_exists($assets[0])
             || $assets[0] != $this->_config['documentation_assets'])
             || $this->_usingDefaultLayout == true

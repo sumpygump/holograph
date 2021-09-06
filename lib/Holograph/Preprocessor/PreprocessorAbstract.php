@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Preprocessor abstract class file
  *
@@ -63,7 +64,7 @@ abstract class PreprocessorAbstract
         $this->_destinationDir = $destination;
         return $this;
     }
-    
+
     /**
      * Get DestinationDir
      *
